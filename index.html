@@ -321,7 +321,7 @@ body.view-desktop .hamb{display:none}
   <aside class="sidebar" id="sidebar">
     <div class="logo-wrap">
       <div class="logo-box">B</div>
-      <div><div class="logo-text">BERCA Retail</div><div class="logo-sub">SAP Sales Intelligence · build C2 ✓Customer</div></div>
+      <div><div class="logo-text">BERCA Retail</div><div class="logo-sub">SAP Sales Intelligence · build C3 ✓Customer</div></div>
     </div>
     <div class="sb-update"><div class="u-lbl" data-i18n="Update Database Terakhir|Last Database Update">Update Database Terakhir</div><div class="u-val" id="sbUpdate">—</div><div class="u-sub" id="sbUpdateSub"></div></div>
     <div class="nav-sec" data-i18n="Ringkasan|Overview">Ringkasan</div>
@@ -1255,7 +1255,10 @@ function buildDataFromPayload(p){
 function loadFromB64(b64){
   try{ const bytes=pako.ungzip(b64ToU8(b64.trim())); const json=new TextDecoder('utf-8').decode(bytes);
     const p=JSON.parse(json);
-    if(!p||!p.cols||!p.cols.cu){ console.warn('Snapshot lama tanpa data Customer/Tahun — dilewati (pakai data terbaru).'); return false; }
+    // VALIDITY GUARD: tolak snapshot tanpa data Customer (semua N/A) atau yang lebih miskin dari data yang sudah dimuat
+    const incCu=(p&&p.cols&&p.cols.cu)?new Set(p.cols.cu).size:0;
+    if(incCu<2){ console.warn('Snapshot tanpa data Customer valid — dilewati (pakai data terbaru).'); return false; }
+    if(DATA&&DATA.rec&&DATA.rec.length){ const curCu=new Set(DATA.rec.map(r=>r.cu)).size; if(incCu<curCu){ console.warn('Snapshot online lebih sedikit customer ('+incCu+' < '+curCu+') — dilewati.'); return false; } }
     buildDataFromPayload(p); initFilters(); applyFilters(); return true;
   }catch(e){ console.error('b64 load error',e); return false; }
 }
