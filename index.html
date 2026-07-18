@@ -1254,7 +1254,9 @@ function buildDataFromPayload(p){
 }
 function loadFromB64(b64){
   try{ const bytes=pako.ungzip(b64ToU8(b64.trim())); const json=new TextDecoder('utf-8').decode(bytes);
-    buildDataFromPayload(JSON.parse(json)); initFilters(); applyFilters(); return true;
+    const p=JSON.parse(json);
+    if(!p||!p.cols||!p.cols.cu){ console.warn('Snapshot lama tanpa data Customer/Tahun — dilewati (pakai data terbaru).'); return false; }
+    buildDataFromPayload(p); initFilters(); applyFilters(); return true;
   }catch(e){ console.error('b64 load error',e); return false; }
 }
 function loadEmbedded(){ if(!EMBEDDED||EMBEDDED.indexOf('__EMBED')===0||typeof pako==='undefined') return false; return loadFromB64(EMBEDDED); }
