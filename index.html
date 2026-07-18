@@ -261,7 +261,7 @@ table.dt td.num,table.dt th.num{text-align:right;font-variant-numeric:tabular-nu
       <div class="auth-divider">atau</div>
       <button class="btn-guest" onclick="enterApp('guest')">👁 Lihat sebagai Tamu</button>
       <div class="auth-switch">Belum punya akun? <a onclick="showPanel('panelReg')">Daftar sekarang</a></div>
-      <div class="hint-box">Akun demo · <b>admin@bercaretail.com</b> / <b>berca2026</b><br>PIN upload data · <b>2468</b></div>
+      <div class="hint-box">Masuk dengan akun Super Admin Anda, atau lihat sebagai Tamu.</div>
     </div>
     <div class="auth-panel" id="panelReg">
       <div class="logo-box" style="margin-bottom:18px">B</div>
@@ -338,7 +338,7 @@ table.dt td.num,table.dt th.num{text-align:right;font-variant-numeric:tabular-nu
 
 <!-- overlays -->
 <div class="overlay" id="loadOverlay"><div class="ov-card"><div class="spinner"></div><h3 id="loadTitle">Memproses data…</h3><p id="loadMsg">Membaca file Excel</p><div class="progbar"><span id="loadProg"></span></div></div></div>
-<div class="overlay" id="pinOverlay"><div class="ov-card"><div style="font-size:40px;margin-bottom:6px">🔒</div><h3>Masukkan PIN</h3><p>Upload data dilindungi PIN.</p><input class="pin-input" id="pinInput" type="password" maxlength="6" inputmode="numeric" placeholder="••••"><br><div class="err-msg" id="pinErr" style="display:none;margin:0 auto 12px;max-width:220px"></div><button class="fbtn primary" onclick="verifyPin()" style="padding:10px 26px">Buka</button> <button class="fbtn" onclick="closePin()">Batal</button></div></div>
+<div class="overlay" id="pinOverlay"><div class="ov-card"><div style="font-size:40px;margin-bottom:6px">🔒</div><h3>Masukkan PIN</h3><p>Upload data dilindungi PIN.</p><input class="pin-input" id="pinInput" type="password" maxlength="8" inputmode="numeric" placeholder="••••••••"><br><div class="err-msg" id="pinErr" style="display:none;margin:0 auto 12px;max-width:220px"></div><button class="fbtn primary" onclick="verifyPin()" style="padding:10px 26px">Buka</button> <button class="fbtn" onclick="closePin()">Batal</button></div></div>
 <div class="toast" id="toast"></div>
 
 <script>
@@ -348,8 +348,8 @@ table.dt td.num,table.dt th.num{text-align:right;font-variant-numeric:tabular-nu
    Lookups: (1) DistChnl -> channel name  (2) Cost Rumus in {0,1} -> By Article CostRms
 ===================================================================== */
 const $=id=>document.getElementById(id);
-const PIN='2468';
-const DEMO={email:'admin@bercaretail.com',pw:'berca2026',name:'Admin',role:'Super Admin'};
+const PIN='10111976';
+const DEMO={email:'brandonyudhaperkasa7876@gmail.com',pw:'yd10111976',name:'Brandon',role:'Super Admin'};
 let CUR=null;               // current user
 let CH={};                  // chart registry
 let DATA=null;              // {rec:[...], channelMap, meta, pdm}
