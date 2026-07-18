@@ -252,13 +252,6 @@ table.dt td.num,table.dt th.num{text-align:right;font-variant-numeric:tabular-nu
 .sb-update .u-val{font-size:13px;font-weight:700;color:#fff;margin-top:2px;font-family:'Sora'}
 .sb-update .u-sub{font-size:10px;color:#7f8db0;margin-top:1px}
 
-@media(max-width:1050px){
-  .sidebar{transform:translateX(-100%);transition:transform .3s;box-shadow:var(--sh-lg)}
-  .sidebar.open{transform:none}
-  .main{margin-left:0}.hamb{display:block}
-  .g2,.g3,.g23,.g12{grid-template-columns:1fr}
-  .auth-left{display:none}.auth-right{width:100%}
-}
 /* forced device views */
 body.view-mobile .sidebar{transform:translateX(-100%);transition:transform .3s;box-shadow:var(--sh-lg)}
 body.view-mobile .sidebar.open{transform:none}
@@ -489,7 +482,6 @@ function setUpdateInfo(){
   $('sbUpdate').textContent=(mName?mName+' ':'')+lastY;
   $('sbUpdateSub').textContent=(LANG==='en'?'Data period ':'Periode data ')+(mos.length?((LANG==='en'?MONTHS_EN:MONTHS)[mos[0]-1]+'–'+mName):'')+' '+lastY;
 }
-
 /* ---------- content localizer (ID source -> EN) ---------- */
 const DICT={
  'Total Revenue (Net)':'Total Revenue (Net)','Total Unit':'Total Units','Gross Profit':'Gross Profit','Gross Margin':'Gross Margin',
@@ -512,7 +504,7 @@ const DICT={
  'Customer':'Customer','Avg/unit':'Avg/unit',
  'Artikel Terjual':'Articles Sold','unique articles':'unique articles','Brand Aktif':'Active Brands','merek':'brands',
  'Kategori':'Categories','category desc':'category desc','Avg Harga/Unit':'Avg Price/Unit','net/unit':'net/unit',
- 'Top 10 Brand':'Top 10 Brands','Top 10 Kategori':'Top 10 Categories','Revenue per Divisi':'Revenue per Division','Unit per Gender':'Units per Gender',
+ 'Top 10 Brand':'Top 10 Brands','Top 10 Kategori':'Top 10 Categories','Unit per Gender':'Units per Gender',
  'Top 15 Artikel':'Top 15 Articles','artikel dengan revenue tertinggi':'articles with highest revenue',
  'Artikel':'Article','Deskripsi':'Description','Unisex':'Unisex','Pria':'Men','Wanita':'Women','Anak':'Kids','Lainnya':'Others',
  'keseluruhan':'overall','Total COGS':'Total COGS','Cost Rumus × qty':'Cost Rumus × qty','Kelengkapan Biaya':'Cost Completeness',
@@ -542,8 +534,7 @@ const RGX=[
  [/^([\d.,]+) unit$/,'$1 units'],[/^([\d.,]+) dokumen$/,'$1 documents'],[/^([\d.,]+) baris$/,'$1 rows'],
  [/^([\d.,]+) bulan$/,'$1 months'],[/^Avg (.+)\/dok$/,'Avg $1/doc'],[/(.+) tanpa cost$/,'$1 without cost'],
  [/^([\d.,]+%) dari SKU$/,'$1 of SKU'],[/(.+) · ([\d.,]+) filter aktif$/,'$1 · $2 active filters'],
- [/^([\d.,]+) unit · ([\d.,]+) dokumen · avg (.+)\/unit$/,'$1 units · $2 documents · avg $3/unit'],
- [/^([\d.,]+) baris$/,'$1 rows']
+ [/^([\d.,]+) unit · ([\d.,]+) dokumen · avg (.+)\/unit$/,'$1 units · $2 documents · avg $3/unit']
 ];
 function localize(root){
   if(!root||LANG!=='en')return;
@@ -958,7 +949,6 @@ function drawTrend(){
   const divs=topN(A.div,6).map(d=>d.name);
   const field=trendMode==='qty'?'qty':trendMode==='gp'?'gp':'net';
   $('trTitle').textContent=(trendMode==='qty'?'Unit':trendMode==='gp'?'Gross Profit':'Revenue')+' Bulanan per Divisi';
-  // per month per division from filtered records (respects active filters)
   const agg={}; divs.forEach(dv=>agg[dv]={});
   for(const r of DATA.rec){
     if(!divs.includes(r.div))continue;
@@ -1232,7 +1222,7 @@ function renderUpload(){
     <div style="display:flex;gap:10px;flex-wrap:wrap">
       <button class="fbtn" onclick="setDataUrl($('cloudUrl').value.trim());toast('URL disimpan','ok')">💾 Simpan URL</button>
       <button class="fbtn" onclick="syncShared(false)">🔄 Muat data online sekarang</button>
-      <button class="fbtn primary" onclick="publishToCloud()">☁ Publish ke Cloud (Apps Script)</button>
+      <button class="fbtn primary" onclick="publishToCloud()">☁ Publish 1-klik ke GitHub (via Apps Script)</button>
       <button class="fbtn" onclick="downloadSnapshot()">⬇ Unduh snapshot (sap-data.b64) untuk GitHub</button>
     </div>
     <p style="font-size:12px;color:var(--t3);margin-top:10px;line-height:1.6">Dua cara publish: <b>(A)</b> unduh <code>sap-data.b64</code> lalu commit ke repo GitHub (Vercel auto-deploy) — dashboard otomatis membacanya; atau <b>(B)</b> Publish ke Cloud lewat Google Apps Script yang sama dengan league-ecomm-dashboard. Prioritas muat: URL Apps Script → <code>sap-data.b64</code> (satu folder) → snapshot bawaan.</p>
@@ -1312,13 +1302,14 @@ function downloadSnapshot(){
   toast('sap-data.b64 diunduh · commit ke GitHub untuk publish','ok');
 }
 async function publishToCloud(){
-  const u=dataUrl(); if(!u){ toast('Set URL Google Apps Script dulu','err'); return; }
-  if(!DATA){ toast('Belum ada data','err'); return; }
-  try{ showLoad('Publish ke Cloud…','Mengunggah snapshot ke Google Apps Script');
+  const u=dataUrl(); if(!u){ toast(tr('Set URL Google Apps Script dulu','Set the Google Apps Script URL first'),'err'); return; }
+  if(!DATA){ toast(tr('Belum ada data','No data yet'),'err'); return; }
+  try{ showLoad(tr('Publish 1-klik ke GitHub…','1-click Publish to GitHub…'),tr('Mengirim snapshot ke Google Apps Script → commit ke GitHub','Sending snapshot to Google Apps Script → commit to GitHub'));
     const b64=encodeSnapshot();
-    await fetch(u,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'save',b64})});
-    hideLoad(); toast('Terpublish ke Cloud ✓','ok');
-  }catch(e){ hideLoad(); toast('Gagal publish: '+e.message,'err'); }
+    // text/plain = "simple request" (tanpa CORS preflight); no-cors agar tidak terblokir membaca response GAS
+    await fetch(u,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'save',b64})});
+    hideLoad(); toast(tr('Terkirim ✓ — Vercel akan deploy ulang ±30 dtk','Sent ✓ — Vercel will redeploy in ~30s'),'ok');
+  }catch(e){ hideLoad(); toast(tr('Gagal publish: ','Publish failed: ')+e.message,'err'); }
 }
 
 /* ---------- boot ---------- */
