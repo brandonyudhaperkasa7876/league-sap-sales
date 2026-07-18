@@ -321,7 +321,7 @@ body.view-desktop .hamb{display:none}
   <aside class="sidebar" id="sidebar">
     <div class="logo-wrap">
       <div class="logo-box">B</div>
-      <div><div class="logo-text">BERCA Retail</div><div class="logo-sub">SAP Sales Intelligence · build C4 ✓ · Bill.Value/COGS langsung dari file</div></div>
+      <div><div class="logo-text">BERCA Retail</div><div class="logo-sub">SAP Sales Intelligence · build C6 ✓ · upload Excel via Web Worker (anti-freeze)</div></div>
     </div>
     <div class="sb-update"><div class="u-lbl" data-i18n="Update Database Terakhir|Last Database Update">Update Database Terakhir</div><div class="u-val" id="sbUpdate">—</div><div class="u-sub" id="sbUpdateSub"></div></div>
     <div class="nav-sec" data-i18n="Ringkasan|Overview">Ringkasan</div>
@@ -588,46 +588,89 @@ function headerIndex(hdr){ const m={}; hdr.forEach((h,i)=>{ if(h!=null){ const k
 function col(m,hdr,...names){ for(const n of names){ const k=n.toLowerCase(); if(k in m)return m[k]; } // fuzzy contains
   for(const n of names){ const k=n.toLowerCase(); for(const h in m){ if(h.includes(k))return m[h]; } } return -1; }
 
+// Monkey-patch sheet_to_json so pre-parsed sheets (from the Web Worker, marked with __rows) work with all existing builders unchanged
+(function(){ if(typeof XLSX==='undefined'||XLSX.__patched)return; const o=XLSX.utils.sheet_to_json; XLSX.utils.sheet_to_json=function(ws,opts){ if(ws&&ws.__rows){ const rows=ws.__rows; if(opts&&opts.range&&typeof opts.range==='object'){ return [rows[opts.range.s.r]||[]]; } return rows; } return o.apply(this,arguments); }; XLSX.__patched=true; })();
+function sheetHeader(ws){ try{ if(ws&&ws.__rows) return (ws.__rows[0]||[]).map(x=>String(x).trim().toLowerCase()); const ref=ws['!ref']; if(!ref)return []; const r=XLSX.utils.decode_range(ref); const rng={s:{r:r.s.r,c:r.s.c},e:{r:r.s.r,c:r.e.c}}; const rows=XLSX.utils.sheet_to_json(ws,{header:1,range:rng,defval:''}); return (rows[0]||[]).map(x=>String(x).trim().toLowerCase()); }catch(e){ return []; } }
+
+/* ---------- Web Worker Excel parser (off main-thread → no freeze on big files) ---------- */
+const WORKER_SRC=`
+self.importScripts('https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js');
+self.onmessage=function(e){
+  try{
+    var files=e.data.files, out=[];
+    for(var i=0;i<files.length;i++){
+      var f=files[i];
+      self.postMessage({type:'progress',p:8+Math.round(i/files.length*72),msg:'Membaca '+f.name});
+      var wb=XLSX.read(new Uint8Array(f.buf),{type:'array',dense:true,cellDates:true,cellStyles:false,cellNF:false,cellHTML:false,sheetStubs:false,bookVBA:false});
+      var sheets={};
+      wb.SheetNames.forEach(function(sn){ sheets[sn]=XLSX.utils.sheet_to_json(wb.Sheets[sn],{header:1,defval:''}); });
+      out.push({name:f.name, SheetNames:wb.SheetNames, sheets:sheets});
+    }
+    self.postMessage({type:'done', parsed:out});
+  }catch(err){ self.postMessage({type:'error', error:String((err&&err.message)||err)}); }
+};`;
+function shimWb(p){ const S={}; p.SheetNames.forEach(sn=>{ S[sn]={__rows:p.sheets[sn]}; }); return {SheetNames:p.SheetNames, Sheets:S}; }
+async function parseFilesInWorker(files,onProg){
+  const bufs=[]; for(const f of files){ bufs.push({name:f.name, buf:await f.arrayBuffer()}); }
+  return await new Promise((resolve,reject)=>{
+    let url; try{ url=URL.createObjectURL(new Blob([WORKER_SRC],{type:'text/javascript'})); }catch(e){ return reject(e); }
+    let w; try{ w=new Worker(url); }catch(e){ return reject(e); }
+    w.onmessage=(ev)=>{ const d=ev.data; if(d.type==='progress'){ onProg&&onProg(d.p,d.msg); } else if(d.type==='done'){ try{w.terminate();URL.revokeObjectURL(url);}catch(e){} resolve(d.parsed); } else if(d.type==='error'){ try{w.terminate();}catch(e){} reject(new Error(d.error)); } };
+    w.onerror=(er)=>{ try{w.terminate();}catch(e){} reject(new Error((er&&er.message)||'worker error')); };
+    try{ w.postMessage({files:bufs}, bufs.map(x=>x.buf)); }catch(e){ w.postMessage({files:bufs}); }
+  });
+}
 function classifyWorkbook(wb,fname){
   const f=fname.toLowerCase();
-  // channel master: sheet with DChl + Name, small
+  // channel master
   for(const sn of wb.SheetNames){
-    const r=XLSX.utils.sheet_to_json(wb.Sheets[sn],{header:1,range:0,defval:''});
-    if(!r.length)continue;
-    const h=r[0].map(x=>String(x).trim().toLowerCase());
-    if((h.includes('dchl')||h.includes('distchnl'))&&h.includes('name')&&r.length<60) return {type:'channel',rows:r};
+    const h=sheetHeader(wb.Sheets[sn]);
+    if((h.includes('dchl')||h.includes('distchnl'))&&h.includes('name')) return {type:'channel',rows:XLSX.utils.sheet_to_json(wb.Sheets[sn],{header:1,defval:''})};
   }
-  // cogs: has "By Article" sheet with Article + CostRms
   if(wb.SheetNames.some(s=>/by article/i.test(s))||/cogs|srp/.test(f)) return {type:'cogs',wb};
-  // pdm: Master Database All
   if(wb.SheetNames.some(s=>/master database/i.test(s))||/pdm/.test(f)) return {type:'pdm',wb};
-  // sales: header contains DistChnl & Cost Rumus
+  // sales: header contains DistCnL/DistChnl + a value metric (Bill.Value / COGS / Net Value / Cost Rumus)
   for(const sn of wb.SheetNames){
-    const r=XLSX.utils.sheet_to_json(wb.Sheets[sn],{header:1,range:0,defval:''});
-    if(!r.length)continue;
-    const h=r[0].map(x=>String(x).trim().toLowerCase());
-    if(h.includes('distchnl')&&(h.some(x=>x.includes('cost rumus'))||h.includes('net value'))) return {type:'sales',sheet:sn,wb};
+    const h=sheetHeader(wb.Sheets[sn]);
+    if((h.includes('distcnl')||h.includes('distchnl'))&&(h.includes('cogs')||h.includes('net value')||h.some(x=>x.includes('bill. value'))||h.some(x=>x.includes('bill.value'))||h.some(x=>x.includes('cost rumus')))) return {type:'sales',sheet:sn,wb};
   }
   return {type:'unknown'};
 }
 
 async function handleFiles(fileList){
-  const files=[...fileList].filter(f=>/\.(xlsx|xlsm|xls|csv)$/i.test(f.name));
-  if(!files.length){ toast('Tidak ada file Excel valid.','err'); return; }
-  showLoad('Memproses data SAP…','Membaca file…');
+  const all=[...fileList];
+  // FAST PATH: pre-processed snapshot (sap-data.b64 / .txt / .json) — instan, tanpa parse Excel besar
+  const snap=all.find(f=>/\.(b64|txt|json)$/i.test(f.name));
+  if(snap){ showLoad('Memuat snapshot…','Membaca '+snap.name);
+    try{ let t=(await snap.text()).trim(); if(t[0]==='{'){ try{ const j=JSON.parse(t); t=(j.b64||j.data||t).trim(); }catch(e){} }
+      if(loadFromB64(t)){ applyLang(); setUpdateInfo(); hideLoad(); toast('Snapshot dimuat \u2713 '+n0(DATA.rec.length)+' baris','ok'); renderUpload(); go('overview'); return; }
+      hideLoad(); toast('Snapshot tidak valid','err'); return;
+    }catch(e){ hideLoad(); toast('Gagal memuat snapshot: '+e.message,'err'); return; } }
+  const files=all.filter(f=>/\.(xlsx|xlsm|xls|csv)$/i.test(f.name));
+  if(!files.length){ toast('Tidak ada file Excel/snapshot valid.','err'); return; }
+  showLoad('Memproses data SAP…','Membaca file\u2026 (file besar bisa memakan beberapa menit)');
   let channelMap=null, cogsWb=null, pdmWb=null, salesInfo=null;
   const statuses={};
   try{
-    for(let i=0;i<files.length;i++){
-      const fl=files[i]; setProg(5+i/files.length*35,'Membaca '+fl.name+' …');
-      const buf=await fl.arrayBuffer();
-      const wb=XLSX.read(new Uint8Array(buf),{type:'array',cellDates:false,cellStyles:false});
-      const c=classifyWorkbook(wb,fl.name);
-      statuses[fl.name]=c.type;
+    // Parse Excel in a Web Worker (off main thread -> tidak membekukan halaman). Fallback main-thread bila Worker gagal.
+    let wbList=[];
+    try{
+      const parsed=await parseFilesInWorker(files,(p,m)=>setProg(p,m));
+      wbList=parsed.map(p=>({wb:shimWb(p), name:p.name}));
+    }catch(werr){
+      console.warn('Worker gagal, fallback main-thread:',werr&&werr.message);
+      for(let i=0;i<files.length;i++){ const fl=files[i]; setProg(5+i/files.length*70,'Membaca '+fl.name);
+        const buf=await fl.arrayBuffer();
+        wbList.push({wb:XLSX.read(new Uint8Array(buf),{type:'array',dense:true,cellDates:true,cellStyles:false,cellNF:false,cellHTML:false,sheetStubs:false,bookVBA:false}), name:fl.name}); }
+    }
+    setProg(82,'Mengklasifikasi file');
+    for(const it of wbList){
+      const c=classifyWorkbook(it.wb,it.name);
+      statuses[it.name]=c.type;
       if(c.type==='channel'){ channelMap={}; c.rows.slice(1).forEach(r=>{ const code=normCode(r[0]); if(code!=='')channelMap[code]=String(r[1]).trim(); }); }
       else if(c.type==='cogs') cogsWb=c.wb;
       else if(c.type==='pdm') pdmWb=c.wb;
-      else if(c.type==='sales') salesInfo={wb:c.wb,sheet:c.sheet,fname:fl.name};
+      else if(c.type==='sales') salesInfo={wb:c.wb,sheet:c.sheet,fname:it.name};
     }
     if(!salesInfo){ hideLoad(); toast('File SAP-YTD-ALL-SALES tidak terdeteksi.','err'); return; }
     // default channel map fallback
@@ -680,55 +723,61 @@ function buildRecords(info,channelMap,artCost,genCost,pdmYear){
     const rows=XLSX.utils.sheet_to_json(ws,{header:1,defval:''});
     const hdr=rows[0]; const m=headerIndex(hdr);
     const I={
-      cust:col(m,hdr,'customer'), custName:col(m,hdr,'customer name'),
-      doc:col(m,hdr,'bill.doc.','bill.doc','bill doc'),
+      custName:col(m,hdr,'customer name'), doc:col(m,hdr,'bill.doc.','bill.doc','bill doc'),
       generic:col(m,hdr,'generic'), article:col(m,hdr,'article'), desc:col(m,hdr,'description'),
       brand:col(m,hdr,'brand desc'), brandId:col(m,hdr,'brand id'), catg:col(m,hdr,'catg. desc','catg.desc','catgr. desc'),
-      mgr:col(m,hdr,'m gr desc','mgr desc'), mercGrp:col(m,hdr,'merc. group.','merc. group','merc.group'), mc:col(m,hdr,'mc. desc','mc.desc'),
-      type:col(m,hdr,'bill.type','bill type'), distchnl:col(m,hdr,'distchnl'),
+      mgr:col(m,hdr,'m gr desc','mgr desc'), mercGrp:col(m,hdr,'merc. group.','merc. group'), mc:col(m,hdr,'mc. desc','mc.desc'),
+      type:col(m,hdr,'bill.type','bill type'), distchnl:col(m,hdr,'distcnl','distchnl'),
       date:col(m,hdr,'bill.date','bill date'), region:col(m,hdr,'region desc'),
-      site:col(m,hdr,'site'), salesman:col(m,hdr,'salesman'), gender:col(m,hdr,'gender'),
+      site:col(m,hdr,'site'), gender:col(m,hdr,'gender'),
       qty:col(m,hdr,'bill.qty','bill qty'), gross:col(m,hdr,'gross value'),
-      net:col(m,hdr,'net value'), srp:col(m,hdr,'srp'), std:col(m,hdr,'std.price','std price'),
+      billv:col(m,hdr,'bill. value','bill.value'), net:col(m,hdr,'net value'),
+      cogsCol:col(m,hdr,'cogs'), gpCol:col(m,hdr,'grossprofit'),
       costRumus:col(m,hdr,'cost rumus')
     };
+    const revCol=(I.billv>=0)?I.billv:I.net;      // new file: Bill.Value | old file: Net Value
+    const directCogs=(I.cogsCol>=0);              // new file provides COGS column directly
+    function ym(v){
+      if(v==null||v==='')return [0,0];
+      if(v instanceof Date)return [v.getFullYear(),v.getMonth()+1];
+      if(typeof v==='number'){ if(v>10000){ const dt=new Date(Math.round((v-25569)*86400000)); return [dt.getUTCFullYear(),dt.getUTCMonth()+1]; } return [0,0]; }
+      const s=String(v).trim();
+      if(/^\d{8}$/.test(s))return [parseInt(s.slice(0,4),10),parseInt(s.slice(4,6),10)];
+      const d=new Date(s); if(!isNaN(d.getTime()))return [d.getFullYear(),d.getMonth()+1];
+      return [0,0];
+    }
     const rec=new Array(rows.length-1); let ri=0;
-    let matchLookup=0, fromBI=0, noCost=0, fromRule=0;
+    let withCost=0, noCost=0;
     pdmYear=pdmYear||{};
     const monthsSet=new Set(), yearsSet=new Set();
     for(let k=1;k<rows.length;k++){
       const r=rows[k]; if(!r||r.length===0)continue;
-      const qty=num(r[I.qty]); const net=num(r[I.net]); const gross=num(r[I.gross]);
-      // ---- LOOKUP 1: DistChnl -> channel name ----
+      const qty=num(r[I.qty]); const net=num(r[revCol]); const gross=num(r[I.gross]);
       const code=normCode(r[I.distchnl]); const ch=channelMap[code]||('Ch '+(code||'?'));
-      // ---- LOOKUP 2: Cost Rumus (BI) in {0,1} -> By Article CostRms ----
-      let bi=num(r[I.costRumus]); let unit, hasCost;
-      if(bi===0||bi===1){
-        const a=String(r[I.article]).trim(), g=String(r[I.generic]).trim();
-        let c=artCost[a]; if(!(c>1)) c=genCost[g];
-        if(c>1){ unit=c; hasCost=true; matchLookup++; }
-        else {
-          // ---- FALLBACK RULE: League Footwear tanpa cost ----
-          // Brand Id (H) in {AF,LA,LG} & Merc.Group (M) = F -> season year via PDM (artikel dipotong 3 digit belakang)
-          const brId=String(r[I.brandId]||'').trim().slice(0,2).toUpperCase();
-          const mg=String(r[I.mercGrp]||'').trim().toUpperCase();
-          let done=false;
-          if((brId==='AF'||brId==='LA'||brId==='LG') && mg==='F'){
-            const yr=pdmYear[a.slice(0,-3)];
-            if(yr){ unit=(yr>=2026)?260000:210000; hasCost=true; fromRule++; done=true; }
-          }
-          if(!done){ unit=0; hasCost=false; noCost++; }
-        }
-      } else { unit=bi; hasCost=true; fromBI++; }
-      const cogs=unit*qty;
-      const ds=String(r[I.date]||'').trim(); const dig=/^\d+$/.test(ds);
-      const yr=(ds.length>=6&&dig)?parseInt(ds.slice(0,4),10):0;
-      const mo=(ds.length>=6&&dig)?parseInt(ds.slice(4,6),10):0;
+      let cogs, hasCost;
+      if(directCogs){
+        cogs=num(r[I.cogsCol]); hasCost=cogs>0;
+      } else {
+        // legacy schema: Cost Rumus + lookups + League footwear rule
+        let bi=num(r[I.costRumus]); let unit;
+        if(bi===0||bi===1){
+          const a=String(r[I.article]).trim(), g=String(r[I.generic]).trim();
+          let c=artCost[a]; if(!(c>1)) c=genCost[g];
+          if(c>1){ unit=c; }
+          else { const brId=String(r[I.brandId]||'').trim().slice(0,2).toUpperCase(); const mg=String(r[I.mercGrp]||'').trim().toUpperCase(); let done=false;
+            if((brId==='AF'||brId==='LA'||brId==='LG')&&mg==='F'){ const yr=pdmYear[a.slice(0,-3)]; if(yr){ unit=(yr>=2026)?260000:210000; done=true; } }
+            if(!done)unit=0; }
+        } else unit=bi;
+        cogs=unit*qty; hasCost=cogs>0;
+      }
+      if(hasCost)withCost++; else noCost++;
+      const ymv=ym(r[I.date]); const yr=ymv[0], mo=ymv[1];
       if(mo)monthsSet.add(mo); if(yr)yearsSet.add(yr);
+      const site=String(r[I.site]||'').trim();
       rec[ri++]={
         y:yr, m:mo, ch, div:String(r[I.mgr]||'').trim()||'(N/A)', cat:String(r[I.catg]||'').trim()||'(N/A)',
         mc:String(r[I.mc]||'').trim(), br:String(r[I.brand]||'').trim()||'(N/A)',
-        rg:String(r[I.region]||'').trim()||'(N/A)', st:String(r[I.site]||'').trim(),
+        rg:(I.region>=0?String(r[I.region]||'').trim():site)||'(N/A)', st:site,
         cu:String(r[I.custName]||'').trim()||'(N/A)', gd:String(r[I.gender]||'').trim()||'?',
         tp:String(r[I.type]||'').trim()||'?', art:String(r[I.article]||'').trim(),
         de:String(r[I.desc]||'').trim(), doc:String(r[I.doc]||'').trim(),
@@ -736,7 +785,7 @@ function buildRecords(info,channelMap,artCost,genCost,pdmYear){
       };
     }
     rec.length=ri;
-    const meta={fname:info.fname,rows:ri,matchLookup,fromBI,noCost,fromRule,months:[...monthsSet].sort((a,b)=>a-b),years:[...yearsSet].sort((a,b)=>a-b)};
+    const meta={fname:info.fname,rows:ri,withCost,noCost,months:[...monthsSet].sort((a,b)=>a-b),years:[...yearsSet].sort((a,b)=>a-b)};
     resolve({rec,meta});
   });
 }
@@ -1199,9 +1248,15 @@ function renderUpload(){
   const loaded=Object.values(st);
   const html=`
   <div class="drop" id="drop" onclick="$('fileInput').click()">
-    <div class="dic">📥</div><h3>Tarik & lepas file Excel di sini</h3>
-    <p>atau klik untuk memilih. Bisa pilih beberapa file sekaligus (.xlsx)</p>
-    <input type="file" id="fileInput" multiple accept=".xlsx,.xlsm,.xls,.csv" style="display:none" onchange="handleFiles(this.files)">
+    <div class="dic">📥</div><h3>Tarik & lepas file di sini</h3>
+    <p>Pilih <b>semua file Excel sekaligus</b> (SAP-YTD-ALL-SALES + Distribution Channel Master + SAP_COGS_SRP + SAP - PDM), atau <b>sap-data.b64</b> untuk update instan.</p>
+    <input type="file" id="fileInput" multiple accept=".xlsx,.xlsm,.xls,.csv,.b64,.txt,.json" style="display:none" onchange="handleFiles(this.files)">
+  </div>
+  <div class="card" style="margin-top:16px;background:var(--surface-2)"><div class="card-title" style="margin-bottom:8px">⭐ Cara terbaik update data</div>
+    <p style="font-size:12.5px;color:var(--t2);line-height:1.8">
+    <b>Opsi A — Upload Excel langsung (paling praktis):</b> pilih ke-4 file Excel sekaligus. File di-<b>proses di latar (Web Worker)</b> sehingga halaman <b>tidak membeku</b> walau file besar; progres tampil di bar. Setelah selesai, klik <b>"⬇ Unduh snapshot (sap-data.b64)"</b> lalu commit ke GitHub agar semua user ikut ter-update.<br>
+    <b>Opsi B — Update instan via snapshot:</b> jika sudah punya <b>sap-data.b64</b>, cukup drop file itu di sini → dimuat seketika tanpa parsing Excel. Cocok untuk update harian yang cepat & ringan di semua device.<br>
+    <b>Opsi C — Otomatis untuk semua user:</b> taruh <b>sap-data.b64</b> di repo GitHub (sebelah index.html) atau isi URL Google Apps Script di bawah — dashboard memuatnya otomatis saat dibuka.</p>
   </div>
   <div class="card" style="margin-top:16px"><div class="card-hdr"><div><div class="card-title">Status File</div><div class="card-sub">file utama wajib · pendukung opsional tapi disarankan</div></div></div>
     ${need.map(([nm,ty,desc])=>{ const ok=loaded.includes(ty); return `<div class="file-row"><div class="fic">${ok?'✅':'📄'}</div><div class="fmeta"><div class="fname">${nm}</div><div class="fstat ${ok?'ok':'wait'}">${ok?'Termuat & diproses':'Belum dimuat — '+desc}</div></div></div>`; }).join('')}
