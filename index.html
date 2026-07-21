@@ -321,7 +321,7 @@ body.view-desktop .hamb{display:none}
   <aside class="sidebar" id="sidebar">
     <div class="logo-wrap">
       <div class="logo-box">B</div>
-      <div><div class="logo-text">BERCA Retail</div><div class="logo-sub">SAP Sales Intelligence · build C6 ✓ · upload Excel via Web Worker (anti-freeze)</div></div>
+      <div><div class="logo-text">BERCA Retail</div><div class="logo-sub">SAP Sales Intelligence · build C7 ✓ · Upload Data khusus Super Admin</div></div>
     </div>
     <div class="sb-update"><div class="u-lbl" data-i18n="Update Database Terakhir|Last Database Update">Update Database Terakhir</div><div class="u-val" id="sbUpdate">—</div><div class="u-sub" id="sbUpdateSub"></div></div>
     <div class="nav-sec" data-i18n="Ringkasan|Overview">Ringkasan</div>
@@ -438,6 +438,8 @@ function enterApp(mode,u){
   $('authScreen').style.display='none'; $('appShell').style.display='block';
   $('sbName').textContent=CUR.name; $('sbRole').textContent=CUR.role;
   $('sbAv').textContent=(CUR.name||'?')[0].toUpperCase();
+  // Upload Data hanya untuk Super Admin
+  const upNav=document.querySelector('[data-pg="upload"]'); if(upNav) upNav.style.display=isSuperAdmin()?'flex':'none';
   applyLang(); applyDevice();
   restoreData();
   setUpdateInfo();
@@ -559,8 +561,10 @@ const PG_META={
   pdm:['Product Data Master','Master artikel: brand, divisi, umur, warna, harga','Product Data Master','Article master: brand, division, age, color, price'],
   upload:['Upload Data','Muat file Excel SAP','Upload Data','Load SAP Excel files']
 };
+function isSuperAdmin(){ return !!(CUR && CUR.role==='Super Admin'); }
 let uploadUnlocked=false;
 function go(pg){
+  if(pg==='upload' && !isSuperAdmin()){ toast(tr('Halaman Upload Data hanya untuk Super Admin','Upload Data is for Super Admin only'),'err'); return; }
   if(pg==='upload' && !uploadUnlocked){ askPin(()=>{ uploadUnlocked=true; go('upload'); }); return; }
   curPage=pg;
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.toggle('active',n.dataset.pg===pg));
