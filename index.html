@@ -321,7 +321,7 @@ body.view-desktop .hamb{display:none}
   <aside class="sidebar" id="sidebar">
     <div class="logo-wrap">
       <div class="logo-box">B</div>
-      <div><div class="logo-text">BERCA Retail</div><div class="logo-sub">SAP Sales Intelligence · build C7 ✓ · Upload Data khusus Super Admin</div></div>
+      <div><div class="logo-text">BERCA Retail</div><div class="logo-sub">SAP Sales Intelligence · build C8 ✓ · halaman By Stock + analisa stock×sales</div></div>
     </div>
     <div class="sb-update"><div class="u-lbl" data-i18n="Update Database Terakhir|Last Database Update">Update Database Terakhir</div><div class="u-val" id="sbUpdate">—</div><div class="u-sub" id="sbUpdateSub"></div></div>
     <div class="nav-sec" data-i18n="Ringkasan|Overview">Ringkasan</div>
@@ -334,6 +334,7 @@ body.view-desktop .hamb{display:none}
     <div class="nav-item" data-pg="margin" onclick="go('margin')"><span class="nav-icon">💹</span><span data-i18n="Margin & COGS|Margin & COGS">Margin & COGS</span></div>
     <div class="nav-item" data-pg="status" onclick="go('status')"><span class="nav-icon">🔖</span><span data-i18n="By Tipe Dokumen|By Document Type">By Tipe Dokumen</span></div>
     <div class="nav-item" data-pg="pareto" onclick="go('pareto')"><span class="nav-icon">🏆</span><span data-i18n="Pareto Produk|Product Pareto">Pareto Produk</span></div>
+    <div class="nav-item" data-pg="stock" onclick="go('stock')"><span class="nav-icon">📦</span><span data-i18n="By Stock|By Stock">By Stock</span></div>
     <div class="nav-sec" data-i18n="Master Data|Master Data">Master Data</div>
     <div class="nav-item" data-pg="pdm" onclick="go('pdm')"><span class="nav-icon">📦</span><span data-i18n="Product Data Master|Product Data Master">Product Data Master</span></div>
     <div class="nav-item" data-pg="upload" onclick="go('upload')"><span class="nav-icon">⬆</span><span data-i18n="Upload Data|Upload Data">Upload Data</span></div>
@@ -372,6 +373,7 @@ body.view-desktop .hamb{display:none}
       <div class="page" id="page-margin"></div>
       <div class="page" id="page-status"></div>
       <div class="page" id="page-pareto"></div>
+      <div class="page" id="page-stock"></div>
       <div class="page" id="page-pdm"></div>
       <div class="page" id="page-upload"></div>
     </div>
@@ -558,6 +560,7 @@ const PG_META={
   margin:['Margin & COGS','Profitabilitas & kelengkapan biaya (Cost Rumus)','Margin & COGS','Profitability & cost completeness (Cost Rumus)'],
   status:['Tipe Dokumen','Distribusi Bill.Type & retur','Document Type','Bill.Type distribution & returns'],
   pareto:['Pareto Produk','Kontribusi 80/20 artikel terhadap revenue','Product Pareto','80/20 article contribution to revenue'],
+  stock:['Analisa Stock','Persediaan (StockSAP_MD) & keterkaitan dengan penjualan','Stock Analysis','Inventory (StockSAP_MD) & its link to sales'],
   pdm:['Product Data Master','Master artikel: brand, divisi, umur, warna, harga','Product Data Master','Article master: brand, division, age, color, price'],
   upload:['Upload Data','Muat file Excel SAP','Upload Data','Load SAP Excel files']
 };
@@ -631,6 +634,12 @@ function classifyWorkbook(wb,fname){
     const h=sheetHeader(wb.Sheets[sn]);
     if((h.includes('dchl')||h.includes('distchnl'))&&h.includes('name')) return {type:'channel',rows:XLSX.utils.sheet_to_json(wb.Sheets[sn],{header:1,defval:''})};
   }
+  // stock: header has inventory value + stock type / aging (StockSAP_MD)
+  for(const sn of wb.SheetNames){
+    const h=sheetHeader(wb.Sheets[sn]);
+    if((h.some(x=>x.includes('inv.val'))||h.includes('inv val'))&&(h.includes('stocktype')||h.includes('aging'))) return {type:'stock',sheet:sn,wb};
+  }
+  if(/stocksap|^stock/i.test(f)){ for(const sn of wb.SheetNames){ const h=sheetHeader(wb.Sheets[sn]); if(h.includes('qty.')||h.includes('aging')) return {type:'stock',sheet:sn,wb}; } }
   if(wb.SheetNames.some(s=>/by article/i.test(s))||/cogs|srp/.test(f)) return {type:'cogs',wb};
   if(wb.SheetNames.some(s=>/master database/i.test(s))||/pdm/.test(f)) return {type:'pdm',wb};
   // sales: header contains DistCnL/DistChnl + a value metric (Bill.Value / COGS / Net Value / Cost Rumus)
@@ -653,7 +662,7 @@ async function handleFiles(fileList){
   const files=all.filter(f=>/\.(xlsx|xlsm|xls|csv)$/i.test(f.name));
   if(!files.length){ toast('Tidak ada file Excel/snapshot valid.','err'); return; }
   showLoad('Memproses data SAP…','Membaca file\u2026 (file besar bisa memakan beberapa menit)');
-  let channelMap=null, cogsWb=null, pdmWb=null, salesInfo=null;
+  let channelMap=null, cogsWb=null, pdmWb=null, salesInfo=null, stockInfo=null;
   const statuses={};
   try{
     // Parse Excel in a Web Worker (off main thread -> tidak membekukan halaman). Fallback main-thread bila Worker gagal.
@@ -674,7 +683,15 @@ async function handleFiles(fileList){
       if(c.type==='channel'){ channelMap={}; c.rows.slice(1).forEach(r=>{ const code=normCode(r[0]); if(code!=='')channelMap[code]=String(r[1]).trim(); }); }
       else if(c.type==='cogs') cogsWb=c.wb;
       else if(c.type==='pdm') pdmWb=c.wb;
+      else if(c.type==='stock') stockInfo={wb:c.wb,sheet:c.sheet,fname:it.name};
       else if(c.type==='sales') salesInfo={wb:c.wb,sheet:c.sheet,fname:it.name};
+    }
+    // Stock-only upload: pakai data sales yang sudah ada (embedded), cukup tambahkan analisa stock
+    if(!salesInfo && stockInfo && DATA && DATA.rec){
+      setProg(60,'Menghitung analisa stock…');
+      const srows=XLSX.utils.sheet_to_json(stockInfo.wb.Sheets[stockInfo.sheet],{header:1,defval:''});
+      DATA.stock=buildStock(srows,DATA.rec); DATA.statuses=Object.assign(DATA.statuses||{},statuses);
+      setProg(97,'Menyiapkan…'); hideLoad(); toast(tr('Analisa stock ditambahkan ✓','Stock analysis added ✓'),'ok'); renderUpload(); go('stock'); return;
     }
     if(!salesInfo){ hideLoad(); toast('File SAP-YTD-ALL-SALES tidak terdeteksi.','err'); return; }
     // default channel map fallback
@@ -688,7 +705,8 @@ async function handleFiles(fileList){
     const {rec,meta}=await buildRecords(salesInfo,channelMap,artCost,genCost,pdmYear);
     setProg(88,'Memproses Product Master…');
     const pdm=pdmWb?buildPDM(pdmWb):null;
-    DATA={rec,channelMap,meta,pdm,statuses};
+    let stock=null; if(stockInfo){ setProg(92,'Menghitung analisa stock…'); const srows=XLSX.utils.sheet_to_json(stockInfo.wb.Sheets[stockInfo.sheet],{header:1,defval:''}); stock=buildStock(srows,rec); }
+    DATA={rec,channelMap,meta,pdm,stock,statuses};
     setProg(97,'Menyiapkan dashboard…');
     initFilters(); applyLang(); applyFilters(); setUpdateInfo();
     hideLoad(); toast('Data berhasil dimuat · '+n0(rec.length)+' baris','ok');
@@ -912,6 +930,7 @@ function render(pg){
   if(pg==='upload'){ renderUpload(); if(LANG==='en')localize($('page-upload')); return; }
   if(!DATA){ $('page-'+pg).innerHTML=emptyState(); return; }
   if(pg==='pdm'){ renderPDM(); if(LANG==='en')localize($('page-pdm')); return; }
+  if(pg==='stock'){ renderStock(); if(LANG==='en')localize($('page-stock')); return; }
   if(!VIEW) applyFilters();
   ({overview:renderOverview,trend:renderTrend,channel:renderChannel,customer:renderCustomer,
     product:renderProduct,margin:renderMargin,status:renderStatus,pareto:renderPareto}[pg]||(()=>{}))();
@@ -1210,6 +1229,125 @@ function renderPareto(){
 }
 
 /* ---------- PDM ---------- */
+/* =====================================================================
+   STOCK: engine (StockSAP_MD) + cross-analysis with sales
+===================================================================== */
+function buildStock(rows, salesRec){
+  const H=(rows[0]||[]).map(x=>String(x).trim().toLowerCase());
+  const ci=(...names)=>{ for(const nm of names){const i=H.indexOf(nm); if(i>=0)return i;} for(const nm of names){for(let i=0;i<H.length;i++)if(H[i].includes(nm))return i;} return -1; };
+  const I={site:ci('site'),sname:ci('sitename'),article:ci('article'),generic:ci('generic'),desc:ci('description'),
+    seasonyr:ci('seasonyr'),brand:ci('brand'),qty:ci('qty.','qty'),aging:ci('aging'),
+    div:ci('division'),dept:ci('department'),cat:ci('category'),stype:ci('stocktype'),
+    srp:ci('srp.','srp'),cost:ci('costrms.','costrms'),inv:ci('inv.val','inv val')};
+  const nv=v=>{ if(v==null)return 0; if(typeof v==='number')return v; const f=parseFloat(String(v).replace(/[^0-9.\-]/g,'')); return isFinite(f)?f:0; };
+  const digits=s=>String(s).replace(/[^0-9]/g,'');
+  const sGenQty={}, sDivRev={}, sDivQty={};
+  const months=(DATA&&DATA.meta&&DATA.meta.months&&DATA.meta.months.length)?DATA.meta.months.length:6;
+  (salesRec||[]).forEach(r=>{ const base=String(r.art||''); const g=digits(base.length>3?base.slice(0,-3):base); if(g)sGenQty[g]=(sGenQty[g]||0)+r.qty; sDivRev[r.div]=(sDivRev[r.div]||0)+r.net; sDivQty[r.div]=(sDivQty[r.div]||0)+r.qty; });
+  const bD={},bC={},bB={},bS={},bSe={},bA={},bT={}, gen={};
+  const add=(o,k,q,v)=>{ k=k||'(N/A)'; const e=o[k]||(o[k]={qty:0,val:0,n:0}); e.qty+=q;e.val+=v;e.n++; };
+  const ageBand=a=>a<=0?'(?)':a<90?'0-3 bln':a<180?'3-6 bln':a<365?'6-12 bln':a<730?'1-2 thn':a<1095?'2-3 thn':'> 3 thn';
+  let tQ=0,tV=0,nrows=0,neg=0; const arts=new Set(), sites=new Set();
+  for(let i=1;i<rows.length;i++){ const r=rows[i]; if(!r||!r.length)continue;
+    const q=nv(r[I.qty]), v=nv(r[I.inv]);
+    const dv=String(r[I.div]||'').trim()||'(N/A)', ct=String(r[I.cat]||'').trim()||'(N/A)';
+    const br=String(r[I.brand]||'').trim()||'(N/A)', st=(String(r[I.sname]||'').trim()||String(r[I.site]||'').trim()||'(N/A)');
+    const syr=String(r[I.seasonyr]||'').trim()||'(N/A)', typ=String(r[I.stype]||'').trim()||'(N/A)';
+    const ag=nv(r[I.aging]), g=String(r[I.generic]||'').trim(), art=String(r[I.article]||'').trim();
+    add(bD,dv,q,v);add(bC,ct,q,v);add(bB,br,q,v);add(bS,st,q,v);add(bSe,syr,q,v);add(bA,ageBand(ag),q,v);add(bT,typ,q,v);
+    if(g){ const o=gen[g]||(gen[g]={qty:0,val:0,cost:nv(r[I.cost]),srp:nv(r[I.srp]),desc:String(r[I.desc]||'').slice(0,34),div:dv,cat:ct,br:br,age:0}); o.qty+=q;o.val+=v; if(ag>o.age)o.age=ag; }
+    tQ+=q;tV+=v;nrows++; if(q<0)neg++; if(art)arts.add(art); if(st)sites.add(st);
+  }
+  let matched=0; const cross=[];
+  for(const g in gen){ const o=gen[g]; const sq=sGenQty[g]||sGenQty[digits(g)]||0; if(sq>0)matched++; const stq=o.qty;
+    const sell=(sq+stq)>0?sq/(sq+stq)*100:0; const cover=sq>0?stq/(sq/months):(stq>0?999:0);
+    cross.push({gen:g,desc:o.desc,div:o.div,cat:o.cat,stq:Math.round(stq),stv:Math.round(o.val),sq:Math.round(sq),sell:+sell.toFixed(1),cover:+cover.toFixed(1),age:Math.round(o.age)}); }
+  const divCross={}; new Set([...Object.keys(bD),...Object.keys(sDivRev)]).forEach(dv=>{ divCross[dv]={stockVal:Math.round((bD[dv]||{}).val||0),stockQty:Math.round((bD[dv]||{}).qty||0),salesRev:Math.round(sDivRev[dv]||0),salesQty:Math.round(sDivQty[dv]||0)}; });
+  const overstock=cross.filter(x=>x.stv>0).sort((a,b)=>(b.stv/(b.sq+1))-(a.stv/(a.sq+1))).slice(0,15);
+  const deadstock=cross.filter(x=>x.stq>0&&x.sq===0&&x.age>=365).sort((a,b)=>b.stv-a.stv).slice(0,15);
+  const understock=cross.filter(x=>x.sq>0&&x.stq<=0).sort((a,b)=>b.sq-a.sq).slice(0,15);
+  const bestsell=cross.filter(x=>x.sq>0&&x.stq>0).sort((a,b)=>b.sq-a.sq).slice(0,15);
+  const scatter=cross.filter(x=>x.sq>0||x.stq>0).sort((a,b)=>Math.abs(b.stv)-Math.abs(a.stv)).slice(0,300);
+  const topGen=Object.keys(gen).map(g=>Object.assign({gen:g},gen[g])).sort((a,b)=>b.val-a.val).slice(0,20);
+  return {totals:{qty:Math.round(tQ),val:Math.round(tV),rows:nrows,neg:neg,articles:arts.size,sites:sites.size,generics:Object.keys(gen).length},
+    byDiv:bD,byCat:bC,byBrand:bB,bySite:bS,bySeason:bSe,byAge:bA,byType:bT,topGen:topGen,divCross:divCross,
+    cross:{matched:matched,total:Object.keys(gen).length,months:months,overstock:overstock,deadstock:deadstock,understock:understock,bestsell:bestsell,scatter:scatter}};
+}
+function stArr(o){ return Object.keys(o).map(k=>({name:k,qty:o[k].qty,val:o[k].val,n:o[k].n})); }
+function stTop(o,nn,by){ by=by||'val'; return stArr(o).sort((a,b)=>Math.abs(b[by])-Math.abs(a[by])).slice(0,nn); }
+function renderStock(){
+  const S=DATA&&DATA.stock;
+  if(!S){ $('page-stock').innerHTML=`<div class="empty"><div class="eic">📦</div><h3>${tr('Data stock belum dimuat','Stock data not loaded')}</h3><p>${tr('Muat file','Load')} <b>StockSAP_MD.XLSX</b> ${tr('lewat menu Upload Data (Super Admin). File diproses di latar (Web Worker) sehingga halaman tidak membeku.','via Upload Data (Super Admin). It is processed in a Web Worker so the page never freezes.')}</p>${isSuperAdmin()?`<button class="fbtn primary" style="padding:11px 26px" onclick="go('upload')">⬆ ${tr('Upload Data','Upload Data')}</button>`:''}</div>`; return; }
+  const T=S.totals, C=S.cross;
+  const deadVal=(C.deadstock||[]).reduce((s,x)=>s+x.stv,0);
+  const avgAge=(S.topGen&&S.topGen.length)?Math.round(S.topGen.reduce((s,x)=>s+x.age,0)/S.topGen.length):0;
+  const html=`
+  <div class="kpi-grid">
+    ${kpi('Nilai Stock',rpShort(T.val),`${n0(T.articles)} artikel · ${n0(T.sites)} site`,'','📦','var(--brand-l)')}
+    ${kpi('Qty Stock',n0(T.qty),`${n0(T.rows)} baris`,'k-teal','🔢','var(--teal-l)')}
+    ${kpi('Generic Unik',n0(T.generics),'SKU generic','k-purple','🏷','var(--purple-l)')}
+    ${kpi('Dead-stock',rpShort(deadVal),`${n0((C.deadstock||[]).length)} generic (umur ≥1thn, tak terjual)`,'k-red','⚠️','var(--red-l)')}
+    ${kpi('Match Sales',pct(C.total?C.matched/C.total*100:0),`${n0(C.matched)}/${n0(C.total)} generic`,'k-amber','🔗','var(--amber-l)')}
+    ${kpi('Qty Negatif',n0(T.neg),'baris koreksi/retur','','↩️','var(--surface-2)')}
+  </div>
+  <div class="grid g23">
+    <div class="card"><div class="card-hdr"><div><div class="card-title">Nilai Stock per Divisi</div><div class="card-sub">Inv.Val</div></div></div><div class="chart-wrap"><canvas id="c-stkDiv"></canvas></div></div>
+    <div class="card"><div class="card-hdr"><div><div class="card-title">Umur Stock (Aging)</div><div class="card-sub">nilai per band umur</div></div></div><div class="chart-wrap"><canvas id="c-stkAge"></canvas></div></div>
+  </div>
+  <div class="grid g3">
+    <div class="card"><div class="card-hdr"><div><div class="card-title">Top Kategori</div></div></div><div class="chart-wrap sm"><canvas id="c-stkCat"></canvas></div></div>
+    <div class="card"><div class="card-hdr"><div><div class="card-title">Stock Type</div></div></div><div class="chart-wrap sm"><canvas id="c-stkType"></canvas></div></div>
+    <div class="card"><div class="card-hdr"><div><div class="card-title">Nilai per Season Year</div></div></div><div class="chart-wrap sm"><canvas id="c-stkSeason"></canvas></div></div>
+  </div>
+  <div class="page-header" style="margin:22px 0 4px"><h2 style="font-size:16px">🔗 Stock × Sales</h2><p>Keterkaitan persediaan dengan penjualan (${n0(C.months)} bulan)</p></div>
+  <div class="grid g2">
+    <div class="card"><div class="card-hdr"><div><div class="card-title">Nilai Stock vs Revenue per Divisi</div><div class="card-sub">stok (Inv.Val) vs penjualan</div></div></div><div class="chart-wrap"><canvas id="c-xDiv"></canvas></div></div>
+    <div class="card"><div class="card-hdr"><div><div class="card-title">Stock Cover per Divisi</div><div class="card-sub">bulan persediaan (Qty stok ÷ laju jual/bln)</div></div></div><div class="chart-wrap"><canvas id="c-xCover"></canvas></div></div>
+  </div>
+  <div class="card"><div class="card-hdr"><div><div class="card-title">Peta Stock vs Sales (per generic)</div><div class="card-sub">X: unit terjual · Y: qty stok — kanan-bawah = laku & stok tipis, kiri-atas = overstock</div></div></div><div class="chart-wrap lg"><canvas id="c-xScatter"></canvas></div></div>
+  <div class="grid g2">
+    <div class="card"><div class="card-hdr"><div><div class="card-title">⚠️ Overstock / Slow-moving</div><div class="card-sub">nilai stok tinggi, penjualan rendah</div></div></div>${stkTable(C.overstock,'cover')}</div>
+    <div class="card"><div class="card-hdr"><div><div class="card-title">💀 Dead-stock</div><div class="card-sub">umur ≥ 1thn & tidak terjual</div></div></div>${stkTable(C.deadstock,'age')}</div>
+  </div>
+  <div class="grid g2">
+    <div class="card"><div class="card-hdr"><div><div class="card-title">🔥 Laris & masih ada stok</div><div class="card-sub">best-seller dengan cover</div></div></div>${stkTable(C.bestsell,'sell')}</div>
+    <div class="card"><div class="card-hdr"><div><div class="card-title">🚨 Understock / Stockout</div><div class="card-sub">terjual tapi stok habis/negatif</div></div></div>${stkTable(C.understock,'sell')}</div>
+  </div>
+  <div class="card"><div class="card-hdr"><div><div class="card-title">Top 20 Generic (Nilai Stock)</div></div></div>
+    <div class="tbl-wrap"><table class="dt"><thead><tr><th>#</th><th>Generic</th><th>Deskripsi</th><th>Divisi</th><th class="num">Qty</th><th class="num">Nilai Stock</th><th class="num">Umur(hr)</th></tr></thead><tbody>
+    ${S.topGen.map((x,i)=>`<tr><td><span class="rank ${i<3?'top':''}">${i+1}</span></td><td><b>${esc(x.gen)}</b></td><td>${esc(x.desc)}</td><td>${esc(x.div)}</td><td class="num">${n0(x.qty)}</td><td class="num">${rp(x.val)}</td><td class="num">${n0(x.age)}</td></tr>`).join('')}
+    </tbody></table></div></div>
+  <div class="card" style="background:var(--surface-2)"><div class="card-title" style="margin-bottom:8px">ℹ️ Catatan</div><p style="font-size:12.5px;color:var(--t2);line-height:1.7">Nilai stok = kolom <b>Inv.Val</b> dari StockSAP_MD (identik dengan sumber). Cross-analysis SKU dicocokkan Stock↔Sales per <b>generic</b> (match ${pct(C.total?C.matched/C.total*100:0)}); analisa per <b>Divisi</b> selalu akurat karena nama divisi sama di kedua file. Qty negatif = koreksi/retur.</p></div>`;
+  $('page-stock').innerHTML=html;
+  const dv=stTop(S.byDiv,8);
+  mk('c-stkDiv',{type:'doughnut',data:{labels:dv.map(x=>x.name),datasets:[{data:dv.map(x=>x.val),backgroundColor:PALETTE,borderWidth:2,borderColor:'#fff'}]},options:{maintainAspectRatio:false,cutout:'60%',plugins:{legend:{position:'right'},tooltip:{callbacks:{label:c=>' '+c.label+': '+rp(c.parsed)}}}}});
+  const ageOrder=['0-3 bln','3-6 bln','6-12 bln','1-2 thn','2-3 thn','> 3 thn','(?)']; const ag=ageOrder.filter(k=>S.byAge[k]);
+  mk('c-stkAge',{type:'bar',data:{labels:ag,datasets:[{label:'Nilai',data:ag.map(k=>S.byAge[k].val),backgroundColor:c=>{const L=ag[c.dataIndex]; return (L.indexOf('thn')>=0)?'#d64545':(L==='6-12 bln'?'#d98a12':'#12a06a');},borderRadius:6,maxBarThickness:46}]},options:{maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>' '+rp(c.parsed.y)}}},scales:{x:{grid:{display:false}},y:axisMoney()}}});
+  const ct=stTop(S.byCat,10);
+  mk('c-stkCat',{type:'bar',data:{labels:ct.map(x=>x.name),datasets:[{label:'Nilai',data:ct.map(x=>x.val),backgroundColor:'#1f5fd4',borderRadius:5,maxBarThickness:22}]},options:{indexAxis:'y',maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>' '+rp(c.parsed.x)}}},scales:{x:axisMoney(),y:{grid:{display:false}}}}});
+  const ty=stArr(S.byType).sort((a,b)=>b.val-a.val);
+  mk('c-stkType',{type:'doughnut',data:{labels:ty.map(x=>x.name),datasets:[{data:ty.map(x=>x.val),backgroundColor:PALETTE,borderWidth:2,borderColor:'#fff'}]},options:{maintainAspectRatio:false,cutout:'58%',plugins:{legend:{position:'bottom'},tooltip:{callbacks:{label:c=>' '+c.label+': '+rp(c.parsed)}}}}});
+  const se=stArr(S.bySeason).filter(x=>/^\d{4}/.test(x.name)).sort((a,b)=>a.name.localeCompare(b.name));
+  mk('c-stkSeason',{type:'bar',data:{labels:se.map(x=>x.name),datasets:[{label:'Nilai',data:se.map(x=>x.val),backgroundColor:'#6d5ae0',borderRadius:5,maxBarThickness:26}]},options:{maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>' '+rp(c.parsed.y)}}},scales:{x:{grid:{display:false}},y:axisMoney()}}});
+  // cross div
+  const dc=Object.keys(S.divCross).map(k=>Object.assign({name:k},S.divCross[k])).sort((a,b)=>b.stockVal-a.stockVal).slice(0,8);
+  mk('c-xDiv',{type:'bar',data:{labels:dc.map(x=>x.name),datasets:[
+    {label:'Nilai Stock',data:dc.map(x=>x.stockVal),backgroundColor:'#d98a12',borderRadius:5},
+    {label:'Revenue',data:dc.map(x=>x.salesRev),backgroundColor:'#1f5fd4',borderRadius:5}]},
+    options:{maintainAspectRatio:false,plugins:{tooltip:{callbacks:{label:c=>' '+c.dataset.label+': '+rp(c.parsed.y)}}},scales:{x:{grid:{display:false}},y:axisMoney()}}});
+  const cov=dc.map(x=>({name:x.name,cover: x.salesQty>0? +(x.stockQty/(x.salesQty/C.months)).toFixed(1) : (x.stockQty>0?null:0)}));
+  mk('c-xCover',{type:'bar',data:{labels:cov.map(x=>x.name),datasets:[{label:'Bulan cover',data:cov.map(x=>x.cover),backgroundColor:c=>{const v=c.raw; return v==null?'#9a9a96':v>12?'#d64545':v>6?'#d98a12':'#12a06a';},borderRadius:6,maxBarThickness:40}]},options:{maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>' '+(c.parsed.y==null?'∞':c.parsed.y+' bln')}}},scales:{x:{grid:{display:false}},y:{grid:{color:gridClr},ticks:{callback:v=>v+' bln'}}}}});
+  const pts=C.scatter.map(x=>({x:x.sq,y:x.stq}));
+  mk('c-xScatter',{type:'scatter',data:{datasets:[{label:'Generic',data:pts,backgroundColor:'rgba(31,95,212,.45)',pointRadius:3}]},
+    options:{maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>' terjual '+n0(c.parsed.x)+' · stok '+n0(c.parsed.y)}}},scales:{x:{title:{display:true,text:tr('Unit terjual','Units sold')},grid:{color:gridClr},ticks:{callback:v=>n0(v)}},y:{title:{display:true,text:tr('Qty stok','Stock qty')},grid:{color:gridClr},ticks:{callback:v=>n0(v)}}}}});
+}
+function stkTable(list,extra){
+  const cols={cover:['Cover','x.cover+" bln"'],age:['Umur','n0(x.age)+" hr"'],sell:['Sell-thru','x.sell+"%"']};
+  const eh=extra==='cover'?'Cover':extra==='age'?'Umur':'Sell-thru';
+  return `<div class="tbl-wrap"><table class="dt"><thead><tr><th>Generic</th><th>Deskripsi</th><th class="num">Stok</th><th class="num">Terjual</th><th class="num">Nilai Stok</th><th class="num">${eh}</th></tr></thead><tbody>
+  ${(list||[]).map(x=>{ const ev=extra==='cover'?(x.cover>=999?'∞':x.cover+' bln'):extra==='age'?n0(x.age)+' hr':x.sell+'%'; return `<tr><td><b>${esc(x.gen)}</b></td><td>${esc(x.desc)}</td><td class="num">${n0(x.stq)}</td><td class="num">${n0(x.sq)}</td><td class="num">${rpShort(x.stv)}</td><td class="num">${ev}</td></tr>`; }).join('')||`<tr><td colspan="6" style="text-align:center;color:var(--t3);padding:16px">—</td></tr>`}
+  </tbody></table></div>`;
+}
 function renderPDM(){
   const P=DATA&&DATA.pdm;
   if(!P){ $('page-pdm').innerHTML=`<div class="empty"><div class="eic">📦</div><h3>Product Data Master belum dimuat</h3><p>Sertakan file <b>SAP - PDM.xlsx</b> saat upload untuk menampilkan analisis master artikel (brand, divisi, umur, warna, harga).</p><button class="fbtn primary" style="padding:11px 26px" onclick="go('upload')">⬆ Upload Data</button></div>`; return; }
