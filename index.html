@@ -321,7 +321,7 @@ body.view-desktop .hamb{display:none}
   <aside class="sidebar" id="sidebar">
     <div class="logo-wrap">
       <div class="logo-box">B</div>
-      <div><div class="logo-text">BERCA Retail</div><div class="logo-sub">SAP Sales Intelligence · build C8 ✓ · halaman By Stock + analisa stock×sales</div></div>
+      <div><div class="logo-text">BERCA Retail</div><div class="logo-sub">SAP Sales Intelligence · build C9 ✓ · StockSAP_MD di Status File + snapshot</div></div>
     </div>
     <div class="sb-update"><div class="u-lbl" data-i18n="Update Database Terakhir|Last Database Update">Update Database Terakhir</div><div class="u-val" id="sbUpdate">—</div><div class="u-sub" id="sbUpdateSub"></div></div>
     <div class="nav-sec" data-i18n="Ringkasan|Overview">Ringkasan</div>
@@ -1385,7 +1385,8 @@ function renderUpload(){
     ['SAP-YTD-ALL-SALES.xlsx','sales','File utama penjualan'],
     ['Distribution Channel Master.xlsx','channel','Lookup nama channel'],
     ['SAP_COGS_SRP.xlsx','cogs','Lookup COGS (By Article)'],
-    ['SAP - PDM.xlsx','pdm','Product Data Master']
+    ['SAP - PDM.xlsx','pdm','Product Data Master'],
+    ['StockSAP_MD.XLSX','stock','Data stock/persediaan (halaman By Stock)']
   ];
   const loaded=Object.values(st);
   const html=`
@@ -1447,7 +1448,7 @@ function buildDataFromPayload(p){
       rg:D.rg[c.rg[i]],st:D.st[c.st[i]],cu:(cuDict&&cuCol)?cuDict[cuCol[i]]:'(N/A)',gd:D.gd[c.gd[i]],tp:D.tp[c.tp[i]],
       art:D.art[ai],de:D.de[ai]||'',doc:c.doc[i],net:c.net[i],qty:c.qty[i],cogs:c.cogs[i],gross:0,hasCost:!!c.hc[i]};
   }
-  DATA={rec,channelMap:p.channelMap,meta:p.meta,pdm:p.pdm,statuses:{sales:'sales',channel:'channel',cogs:'cogs',pdm:'pdm'}};
+  DATA={rec,channelMap:p.channelMap,meta:p.meta,pdm:p.pdm,stock:p.stock||null,statuses:{sales:'sales',channel:'channel',cogs:'cogs',pdm:'pdm',stock:p.stock?'stock':undefined}};
 }
 function loadFromB64(b64){
   try{ const bytes=pako.ungzip(b64ToU8(b64.trim())); const json=new TextDecoder('utf-8').decode(bytes);
@@ -1491,7 +1492,7 @@ function encodeSnapshot(){
     cols.cogs.push(Math.round(r.cogs)); cols.hc.push(r.hasCost?1:0);
   }
   const dict={}; dn.forEach(d=>dict[d]=dl[d]); dict.de=de;
-  const json=JSON.stringify({dict,cols,meta:DATA.meta,channelMap:DATA.channelMap,pdm:DATA.pdm});
+  const json=JSON.stringify({dict,cols,meta:DATA.meta,channelMap:DATA.channelMap,pdm:DATA.pdm,stock:DATA.stock||null});
   const gz=pako.gzip(json); let bin=''; const CH=0x8000;
   for(let i=0;i<gz.length;i+=CH) bin+=String.fromCharCode.apply(null,gz.subarray(i,i+CH));
   return btoa(bin);
