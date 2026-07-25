@@ -251,10 +251,25 @@ table.dt td.num,table.dt th.num{text-align:right;font-variant-numeric:tabular-nu
 .sb-update .u-lbl{font-size:9px;font-weight:700;letter-spacing:.09em;color:#6675a0;text-transform:uppercase}
 .sb-update .u-val{font-size:13px;font-weight:700;color:#fff;margin-top:2px;font-family:'Sora'}
 .sb-update .u-sub{font-size:10px;color:#7f8db0;margin-top:1px}
-.sb-credit{margin:0 4px 12px;padding:10px 12px;border-radius:11px;background:linear-gradient(135deg,rgba(31,95,212,.20),rgba(14,165,163,.16));border:1px solid rgba(255,255,255,.10)}
-.sb-credit .c-lbl{font-size:9px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:#8fa0c8}
-.sb-credit .c-name{font-size:13.5px;font-weight:800;color:#fff;font-family:'Sora';margin-top:2px}
-.sb-credit .c-sub{font-size:10px;color:#9fb0d4;margin-top:3px;line-height:1.4}
+/* elegant preparer credit (top of sidebar) */
+.sb-credit-top{position:relative;margin:2px 2px 15px;padding:13px 14px 11px;border-radius:14px;overflow:hidden;
+  background:linear-gradient(155deg,rgba(22,29,54,.95),rgba(12,17,34,.95));
+  border:1px solid rgba(217,178,90,.22);
+  box-shadow:0 8px 24px -12px rgba(0,0,0,.7),inset 0 1px 0 rgba(255,255,255,.05)}
+.sb-credit-top::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,transparent,#c8a24e 25%,#f3d998 50%,#c8a24e 75%,transparent)}
+.sb-credit-top::after{content:'';position:absolute;top:-40%;right:-30%;width:120px;height:120px;
+  background:radial-gradient(circle,rgba(217,178,90,.16),transparent 65%);pointer-events:none}
+.sb-credit-top .cr-row{display:flex;align-items:center;gap:11px;position:relative;z-index:1}
+.sb-credit-top .cr-mono{flex:none;width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;
+  font-family:'Sora';font-weight:800;font-size:13px;letter-spacing:.5px;color:#231803;
+  background:linear-gradient(135deg,#f6e0a6,#d9b25a);box-shadow:0 4px 12px -3px rgba(217,178,90,.55)}
+.sb-credit-top .cr-lbl{font-size:8px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:#c8a970}
+.sb-credit-top .cr-name{font-size:14.5px;font-weight:800;font-family:'Sora';line-height:1.15;margin-top:2px;
+  background:linear-gradient(90deg,#ffffff,#f0dcae);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:#fff}
+.sb-credit-top .cr-sub{position:relative;z-index:1;font-size:9.5px;color:#93a3c6;margin-top:9px;padding-top:8px;line-height:1.45;
+  border-top:1px solid rgba(255,255,255,.07);display:flex;align-items:center;gap:6px}
+.sb-credit-top .cr-sub .spark{color:#d9b25a;font-size:9px;flex:none}
 /* SWOT page */
 .swot-grid{display:grid;grid-template-columns:1fr 1fr;gap:15px;margin-bottom:15px}
 .swot-card{border-radius:var(--r);padding:18px;border:1px solid var(--border);position:relative;overflow:hidden;box-shadow:var(--sh-sm)}
@@ -344,7 +359,17 @@ body.view-desktop .hamb{display:none}
   <aside class="sidebar" id="sidebar">
     <div class="logo-wrap">
       <div class="logo-box">B</div>
-      <div><div class="logo-text">BERCA Retail</div><div class="logo-sub">SAP Sales Intelligence · build C12 ✓ · SWOT: fix scoping stok LEAGUE(LG0)/LEGAS(LA0)</div></div>
+      <div><div class="logo-text">BERCA Retail</div><div class="logo-sub">SAP Sales Intelligence · build C13 ✓ · sesi tetap saat refresh + kredit elegan</div></div>
+    </div>
+    <div class="sb-credit-top">
+      <div class="cr-row">
+        <div class="cr-mono">BP</div>
+        <div style="min-width:0">
+          <div class="cr-lbl" data-i18n="Disusun oleh|Prepared by">Disusun oleh</div>
+          <div class="cr-name">Brandon Yudha P</div>
+        </div>
+      </div>
+      <div class="cr-sub"><span class="spark">✦</span><span data-i18n="Hasil kolaborasi dengan Claude (AI)|In collaboration with Claude (AI)">Hasil kolaborasi dengan Claude (AI)</span></div>
     </div>
     <div class="sb-update"><div class="u-lbl" data-i18n="Update Database Terakhir|Last Database Update">Update Database Terakhir</div><div class="u-val" id="sbUpdate">—</div><div class="u-sub" id="sbUpdateSub"></div></div>
     <div class="nav-sec" data-i18n="Ringkasan|Overview">Ringkasan</div>
@@ -364,11 +389,6 @@ body.view-desktop .hamb{display:none}
     <div class="nav-item" data-pg="pdm" onclick="go('pdm')"><span class="nav-icon">📦</span><span data-i18n="Product Data Master|Product Data Master">Product Data Master</span></div>
     <div class="nav-item" data-pg="upload" onclick="go('upload')"><span class="nav-icon">⬆</span><span data-i18n="Upload Data|Upload Data">Upload Data</span></div>
     <div class="sidebar-footer">
-      <div class="sb-credit">
-        <div class="c-lbl" data-i18n="Disiapkan oleh|Prepared by">Disiapkan oleh</div>
-        <div class="c-name">Brandon Yudha P</div>
-        <div class="c-sub" data-i18n="Kolaborasi Brandon YP × Claude (AI)|Built by Brandon YP × Claude (AI)">Kolaborasi Brandon YP × Claude (AI)</div>
-      </div>
       <div class="user-info"><div class="user-avatar" id="sbAv">A</div><div style="min-width:0"><div class="user-name" id="sbName">Admin</div><div class="user-role" id="sbRole">Super Admin</div></div></div>
       <button class="btn-logout" onclick="doLogout()" data-i18n="Keluar|Log Out">Keluar</button>
     </div>
@@ -468,6 +488,7 @@ function doRegister(){
 }
 function enterApp(mode,u){
   CUR=u||{name:'Tamu',email:'',role:'Guest'};
+  try{ localStorage.setItem('berca_cur',JSON.stringify(CUR)); }catch(e){}   // keep session across refresh
   $('authScreen').style.display='none'; $('appShell').style.display='block';
   $('sbName').textContent=CUR.name; $('sbRole').textContent=CUR.role;
   $('sbAv').textContent=(CUR.name||'?')[0].toUpperCase();
@@ -476,11 +497,14 @@ function enterApp(mode,u){
   applyLang(); applyDevice();
   restoreData();
   setUpdateInfo();
-  go('overview');
+  // restore last viewed page (upload needs PIN, so fall back to overview)
+  let start='overview'; try{ start=localStorage.getItem('sap_page')||'overview'; }catch(e){}
+  if(start==='upload' || !document.getElementById('page-'+start)) start='overview';
+  go(start);
   // try to load shared/online data (overrides embedded snapshot if available)
   setTimeout(()=>{ syncShared(true); },300);
 }
-function doLogout(){ CUR=null; $('appShell').style.display='none'; $('authScreen').style.display='flex'; $('liPw').value=''; }
+function doLogout(){ CUR=null; try{ localStorage.removeItem('berca_cur'); }catch(e){} $('appShell').style.display='none'; $('authScreen').style.display='flex'; $('liPw').value=''; }
 
 /* ---------- sidebar (mobile) ---------- */
 function openSidebar(){ $('sidebar').classList.add('open'); $('backdrop').classList.add('show'); }
@@ -602,6 +626,7 @@ function go(pg){
   if(pg==='upload' && !isSuperAdmin()){ toast(tr('Halaman Upload Data hanya untuk Super Admin','Upload Data is for Super Admin only'),'err'); return; }
   if(pg==='upload' && !uploadUnlocked){ askPin(()=>{ uploadUnlocked=true; go('upload'); }); return; }
   curPage=pg;
+  try{ localStorage.setItem('sap_page',pg); }catch(e){}   // remember page across refresh
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.toggle('active',n.dataset.pg===pg));
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   $('page-'+pg).classList.add('active');
@@ -1652,6 +1677,11 @@ window.addEventListener('DOMContentLoaded',()=>{
   $('liPw').addEventListener('keydown',e=>{ if(e.key==='Enter')doLogin(); });
   $('rgPw').addEventListener('keydown',e=>{ if(e.key==='Enter')doRegister(); });
   const pin=$('pinInput'); if(pin)pin.addEventListener('keydown',e=>{ if(e.key==='Enter')verifyPin(); });
+  // auto-restore session so a browser refresh keeps the user logged in on the same page
+  try{
+    const s=localStorage.getItem('berca_cur');
+    if(s){ const u=JSON.parse(s); if(u && u.role){ enterApp(u.role==='Super Admin'?'super':'user',u); } }
+  }catch(e){}
 });
 </script>
 </body>
