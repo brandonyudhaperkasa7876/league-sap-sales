@@ -344,7 +344,7 @@ body.view-desktop .hamb{display:none}
   <aside class="sidebar" id="sidebar">
     <div class="logo-wrap">
       <div class="logo-box">B</div>
-      <div><div class="logo-text">BERCA Retail</div><div class="logo-sub">SAP Sales Intelligence · build C11 ✓ · SWOT khusus brand LEAGUE & LEGAS</div></div>
+      <div><div class="logo-text">BERCA Retail</div><div class="logo-sub">SAP Sales Intelligence · build C12 ✓ · SWOT: fix scoping stok LEAGUE(LG0)/LEGAS(LA0)</div></div>
     </div>
     <div class="sb-update"><div class="u-lbl" data-i18n="Update Database Terakhir|Last Database Update">Update Database Terakhir</div><div class="u-val" id="sbUpdate">—</div><div class="u-sub" id="sbUpdateSub"></div></div>
     <div class="nav-sec" data-i18n="Ringkasan|Overview">Ringkasan</div>
@@ -1285,11 +1285,13 @@ function renderSWOT(){
   const growCh=chMg.filter(c=>c.share<20&&c.mg>margin).sort((a,b)=>b.mg-a.mg)[0];
   let deadVal=0,slowVal=0,invVal=0,oldRp=0,agingOldPct=0,coverImplied=null,understockTop=[],deadTop=[],stkQty=0,stockScoped=false;
   if(S){ stockScoped=true;
-    const inBR=x=>x&&x.br&&BR.has(String(x.br).toUpperCase());
+    // Stok memakai KODE brand (LG0=LEAGUE, LA0=LEGAS); sales memakai NAMA. Cocokkan keduanya.
+    const BRS=new Set(['LEAGUE','LEGAS','LG0','LA0']);
+    const inBR=x=>x&&x.br&&BRS.has(String(x.br).trim().toUpperCase());
     const dead=(S.cross.deadstock||[]).filter(inBR), over=(S.cross.overstock||[]).filter(inBR), under=(S.cross.understock||[]).filter(inBR);
     deadVal=dead.reduce((s,x)=>s+x.stv,0); slowVal=over.reduce((s,x)=>s+x.stv,0);
     understockTop=under.slice(0,3); deadTop=dead.slice(0,3);
-    ['LEAGUE','LEGAS'].forEach(b=>{ const e=S.byBrand&&S.byBrand[b]; if(e){ invVal+=e.val; stkQty+=e.qty; oldRp+=(e.old||0); } });
+    Object.keys(S.byBrand||{}).forEach(b=>{ if(BRS.has(String(b).trim().toUpperCase())){ const e=S.byBrand[b]; invVal+=e.val; stkQty+=e.qty; oldRp+=(e.old||0); } });
     agingOldPct=invVal?oldRp/invVal*100:0;
     const mo=(S.cross.months)||6; coverImplied=A.qty?stkQty/(A.qty/mo):null; }
   const P=[],Wk=[],O=[],Th=[];
