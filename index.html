@@ -344,7 +344,7 @@ body.view-desktop .hamb{display:none}
   <aside class="sidebar" id="sidebar">
     <div class="logo-wrap">
       <div class="logo-box">B</div>
-      <div><div class="logo-text">BERCA Retail</div><div class="logo-sub">SAP Sales Intelligence · build C10 ✓ · halaman SWOT + kredit penyusun</div></div>
+      <div><div class="logo-text">BERCA Retail</div><div class="logo-sub">SAP Sales Intelligence · build C11 ✓ · SWOT khusus brand LEAGUE & LEGAS</div></div>
     </div>
     <div class="sb-update"><div class="u-lbl" data-i18n="Update Database Terakhir|Last Database Update">Update Database Terakhir</div><div class="u-val" id="sbUpdate">—</div><div class="u-sub" id="sbUpdateSub"></div></div>
     <div class="nav-sec" data-i18n="Ringkasan|Overview">Ringkasan</div>
@@ -592,7 +592,7 @@ const PG_META={
   status:['Tipe Dokumen','Distribusi Bill.Type & retur','Document Type','Bill.Type distribution & returns'],
   pareto:['Pareto Produk','Kontribusi 80/20 artikel terhadap revenue','Product Pareto','80/20 article contribution to revenue'],
   stock:['Analisa Stock','Persediaan (StockSAP_MD) & keterkaitan dengan penjualan','Stock Analysis','Inventory (StockSAP_MD) & its link to sales'],
-  swot:['Analisa SWOT','Strengths · Weaknesses · Opportunities · Threats (berbasis data sales & stock)','SWOT Analysis','Strengths · Weaknesses · Opportunities · Threats (data-driven)'],
+  swot:['Analisa SWOT — Brand LEAGUE & LEGAS','Strengths · Weaknesses · Opportunities · Threats (khusus brand LEAGUE & LEGAS)','SWOT — LEAGUE & LEGAS','Strengths · Weaknesses · Opportunities · Threats (LEAGUE & LEGAS only)'],
   pdm:['Product Data Master','Master artikel: brand, divisi, umur, warna, harga','Product Data Master','Article master: brand, division, age, color, price'],
   upload:['Upload Data','Muat file Excel SAP','Upload Data','Load SAP Excel files']
 };
@@ -1265,10 +1265,15 @@ function renderPareto(){
    SWOT: data-driven strategic analysis (sales VIEW + stock DATA.stock)
 ===================================================================== */
 function renderSWOT(){
-  const A=VIEW; const S=DATA&&DATA.stock;
+  const BR=new Set(['LEAGUE','LEGAS']);
+  const fy=new Set(mselVals('year')),fm=new Set(mselVals('month')),fch=new Set(mselVals('channel')),fdv=new Set(mselVals('div')),fbr=new Set(mselVals('brand'));
+  const fr=DATA.rec.filter(r=> BR.has(String(r.br).toUpperCase()) && (!fy.size||fy.has(r.y))&&(!fm.size||fm.has(r.m))&&(!fch.size||fch.has(r.ch))&&(!fdv.size||fdv.has(r.div))&&(!fbr.size||fbr.has(r.br)));
+  const A=aggregate(fr); const S=DATA&&DATA.stock;
   const net=A.net||0, gp=A.gp||0, margin=A.margin||0;
-  const chs=topN(A.ch,60), custs=topN(A.cust,60), divs=topN(A.div,60), brs=topN(A.br,60), arts=topN(A.art,60);
-  const topDiv=divs[0], topBr=brs[0], topArt=arts[0], topCust=custs[0];
+  if(!fr.length){ $('page-swot').innerHTML=`<div class="empty"><div class="eic">🧭</div><h3>${tr('Tidak ada data LEAGUE/LEGAS','No LEAGUE/LEGAS data')}</h3><p>${tr('Tidak ada transaksi brand LEAGUE atau LEGAS untuk filter aktif saat ini.','No LEAGUE/LEGAS transactions for the current filters.')}</p></div>`; return; }
+  const chs=topN(A.ch,60), custs=topN(A.cust,60), divs=topN(A.div,60), cats=topN(A.cat,60), arts=topN(A.art,60);
+  const topDiv=divs[0], topCat=cats[0], topArt=arts[0], topCust=custs[0];
+  const leaNet=A.br['LEAGUE']?A.br['LEAGUE'].net:0, legNet=A.br['LEGAS']?A.br['LEGAS'].net:0;
   const custShare=topCust&&net?topCust.net/net*100:0;
   const top5cust=net?custs.slice(0,5).reduce((s,x)=>s+x.net,0)/net*100:0;
   const top3ch=net?chs.slice(0,3).reduce((s,x)=>s+x.net,0)/net*100:0;
@@ -1278,16 +1283,20 @@ function renderSWOT(){
   const bestMgDiv=divMg.slice().sort((a,b)=>b.mg-a.mg)[0], worstMgDiv=divMg.slice().sort((a,b)=>a.mg-b.mg)[0];
   const chMg=chs.filter(c=>c.net>0).map(c=>({name:c.name,mg:(c.net-c.cogs)/c.net*100,share:c.net/net*100}));
   const growCh=chMg.filter(c=>c.share<20&&c.mg>margin).sort((a,b)=>b.mg-a.mg)[0];
-  let deadVal=0,slowVal=0,invVal=0,oldRp=0,agingOldPct=0,coverImplied=null,understockTop=[],deadTop=[];
-  if(S){ deadVal=(S.cross.deadstock||[]).reduce((s,x)=>s+x.stv,0); slowVal=(S.cross.overstock||[]).reduce((s,x)=>s+x.stv,0);
-    invVal=S.totals.val; understockTop=(S.cross.understock||[]).slice(0,3); deadTop=(S.cross.deadstock||[]).slice(0,3);
-    oldRp=Object.keys(S.byAge).filter(k=>/thn/.test(k)).reduce((s,k)=>s+S.byAge[k].val,0); agingOldPct=invVal?oldRp/invVal*100:0;
-    const mo=S.cross.months||6; coverImplied=A.qty?S.totals.qty/(A.qty/mo):null; }
+  let deadVal=0,slowVal=0,invVal=0,oldRp=0,agingOldPct=0,coverImplied=null,understockTop=[],deadTop=[],stkQty=0,stockScoped=false;
+  if(S){ stockScoped=true;
+    const inBR=x=>x&&x.br&&BR.has(String(x.br).toUpperCase());
+    const dead=(S.cross.deadstock||[]).filter(inBR), over=(S.cross.overstock||[]).filter(inBR), under=(S.cross.understock||[]).filter(inBR);
+    deadVal=dead.reduce((s,x)=>s+x.stv,0); slowVal=over.reduce((s,x)=>s+x.stv,0);
+    understockTop=under.slice(0,3); deadTop=dead.slice(0,3);
+    ['LEAGUE','LEGAS'].forEach(b=>{ const e=S.byBrand&&S.byBrand[b]; if(e){ invVal+=e.val; stkQty+=e.qty; oldRp+=(e.old||0); } });
+    agingOldPct=invVal?oldRp/invVal*100:0;
+    const mo=(S.cross.months)||6; coverImplied=A.qty?stkQty/(A.qty/mo):null; }
   const P=[],Wk=[],O=[],Th=[];
   // STRENGTHS
   P.push(`Gross margin <b>${pct(margin)}</b> — laba kotor <b>${rpShort(gp)}</b> atas revenue ${rpShort(net)}.`);
   if(topDiv)P.push(`Divisi <b>${esc(topDiv.name)}</b> memimpin: <b>${rpShort(topDiv.net)}</b> (${pct(topDiv.net/net*100,0)} revenue).`);
-  if(topBr)P.push(`Brand <b>${esc(topBr.name)}</b> dominan — <b>${pct(topBr.net/net*100,0)}</b> dari revenue.`);
+  P.push(`Portofolio brand utama: <b>LEAGUE</b> ${rpShort(leaNet)} (${pct(net?leaNet/net*100:0,0)})${legNet>0?` + <b>LEGAS</b> ${rpShort(legNet)} (${pct(net?legNet/net*100:0,0)})`:''}.`);
   if(bestMgDiv)P.push(`Profitabilitas terbaik di <b>${esc(bestMgDiv.name)}</b> (margin <b>${pct(bestMgDiv.mg,0)}</b>).`);
   if(topArt)P.push(`Produk unggulan <b>${esc(topArt.name)}</b>: ${rpShort(topArt.net)} · ${n0(topArt.qty)} unit.`);
   P.push(`Jangkauan luas: <b>${n0(A.nCust)}</b> customer & <b>${n0(A.nArts)}</b> artikel aktif di ${n0(Object.keys(A.ch).length)} channel.`);
@@ -1324,6 +1333,13 @@ function renderSWOT(){
   const quad=(cls,ic,title,sub,items,badge,badgeCls)=>`<div class="swot-card ${cls}"><div class="sw-h"><div class="sw-ic">${ic}</div><div><div class="sw-t">${title}</div><div class="sw-s">${sub}</div></div><span class="sw-badge tag ${badgeCls}">${badge}</span></div><ul>${items.map(t=>`<li><span class="li-b">•</span><span>${t}</span></li>`).join('')}</ul></div>`;
   const verdict = margin>=40 && top5cust<=60 ? tr('Posisi kuat & profitabel','Strong & profitable') : (top5cust>70||margin<25?tr('Perlu perhatian','Needs attention'):tr('Sehat dengan area perbaikan','Healthy with room to improve'));
   const html=`
+  <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px">
+    <span class="pill" style="background:var(--brand-l);color:var(--brand);border-color:transparent;font-weight:700">🎯 ${tr('Fokus brand','Brand focus')}: LEAGUE & LEGAS</span>
+    <span class="pill"><b>${n0(A.lines)}</b> ${tr('baris','rows')}</span>
+    <span class="pill"><b>${rpShort(net)}</b> ${tr('revenue','revenue')}</span>
+    <span class="pill"><b>${n0(A.qty)}</b> unit</span>
+    ${S&&invVal?`<span class="pill"><b>${rpShort(invVal)}</b> ${tr('nilai stok','stock value')}</span>`:''}
+  </div>
   <div class="kpi-grid">
     ${chips.map((c,i)=>kpi(c[0],c[1],'',c[2]==='g'?'k-green':c[2]==='a'?'k-amber':'k-red', c[2]==='g'?'✅':c[2]==='a'?'⚠️':'⛔', c[2]==='g'?'var(--green-l)':c[2]==='a'?'var(--amber-l)':'var(--red-l)')).join('')}
   </div>
@@ -1338,7 +1354,7 @@ function renderSWOT(){
     ${quad('sw-O','🚀',tr('Opportunities (Peluang)','Opportunities'),tr('potensi pertumbuhan','growth potential'),O,'O','b')}
     ${quad('sw-T','⚠️',tr('Threats (Ancaman)','Threats'),tr('risiko yang harus diwaspadai','risks to watch'),Th,'T','r')}
   </div>
-  <div class="card" style="background:var(--surface-2)"><div class="card-title" style="margin-bottom:8px">ℹ️ ${tr('Dasar analisa','Basis')}</div><p style="font-size:12.5px;color:var(--t2);line-height:1.7">${tr('SWOT dihitung otomatis dari data','SWOT is auto-computed from')} <b>SAP-YTD-ALL-SALES</b> (revenue, margin, channel, customer, produk)${S?` ${tr('dan','and')} <b>StockSAP_MD</b> (${tr('nilai stok, umur, dead-stock, stock cover','stock value, aging, dead-stock, cover')})`:` — ${tr('muat StockSAP_MD untuk melengkapi sisi persediaan','load StockSAP_MD to complete the inventory side')}`}. ${tr('Angka mengikuti filter aktif & identik dengan data sumber.','Figures follow active filters and match the source data.')}</p></div>`;
+  <div class="card" style="background:var(--surface-2)"><div class="card-title" style="margin-bottom:8px">ℹ️ ${tr('Dasar analisa','Basis')}</div><p style="font-size:12.5px;color:var(--t2);line-height:1.7">${tr('SWOT dihitung otomatis dari data','SWOT is auto-computed from')} <b>SAP-YTD-ALL-SALES</b> (revenue, margin, channel, customer, produk)${S?` ${tr('dan','and')} <b>StockSAP_MD</b> (${tr('nilai stok, umur, dead-stock, stock cover','stock value, aging, dead-stock, cover')})`:` — ${tr('muat StockSAP_MD untuk melengkapi sisi persediaan','load StockSAP_MD to complete the inventory side')}`}. ${tr('Cakupan: HANYA brand LEAGUE & LEGAS. Angka mengikuti filter aktif & identik dengan data sumber.','Scope: LEAGUE & LEGAS brands ONLY. Figures follow active filters and match the source data.')}</p></div>`;
   $('page-swot').innerHTML=html;
 }
 
@@ -1368,13 +1384,14 @@ function buildStock(rows, salesRec){
     const syr=String(r[I.seasonyr]||'').trim()||'(N/A)', typ=String(r[I.stype]||'').trim()||'(N/A)';
     const ag=nv(r[I.aging]), g=String(r[I.generic]||'').trim(), art=String(r[I.article]||'').trim();
     add(bD,dv,q,v);add(bC,ct,q,v);add(bB,br,q,v);add(bS,st,q,v);add(bSe,syr,q,v);add(bA,ageBand(ag),q,v);add(bT,typ,q,v);
+    bB[br||'(N/A)'].old=(bB[br||'(N/A)'].old||0)+((ag>=365&&q>0)?v:0);
     if(g){ const o=gen[g]||(gen[g]={qty:0,val:0,cost:nv(r[I.cost]),srp:nv(r[I.srp]),desc:String(r[I.desc]||'').slice(0,34),div:dv,cat:ct,br:br,age:0}); o.qty+=q;o.val+=v; if(ag>o.age)o.age=ag; }
     tQ+=q;tV+=v;nrows++; if(q<0)neg++; if(art)arts.add(art); if(st)sites.add(st);
   }
   let matched=0; const cross=[];
   for(const g in gen){ const o=gen[g]; const sq=sGenQty[g]||sGenQty[digits(g)]||0; if(sq>0)matched++; const stq=o.qty;
     const sell=(sq+stq)>0?sq/(sq+stq)*100:0; const cover=sq>0?stq/(sq/months):(stq>0?999:0);
-    cross.push({gen:g,desc:o.desc,div:o.div,cat:o.cat,stq:Math.round(stq),stv:Math.round(o.val),sq:Math.round(sq),sell:+sell.toFixed(1),cover:+cover.toFixed(1),age:Math.round(o.age)}); }
+    cross.push({gen:g,desc:o.desc,div:o.div,cat:o.cat,br:o.br,stq:Math.round(stq),stv:Math.round(o.val),sq:Math.round(sq),sell:+sell.toFixed(1),cover:+cover.toFixed(1),age:Math.round(o.age)}); }
   const divCross={}; new Set([...Object.keys(bD),...Object.keys(sDivRev)]).forEach(dv=>{ divCross[dv]={stockVal:Math.round((bD[dv]||{}).val||0),stockQty:Math.round((bD[dv]||{}).qty||0),salesRev:Math.round(sDivRev[dv]||0),salesQty:Math.round(sDivQty[dv]||0)}; });
   const overstock=cross.filter(x=>x.stv>0).sort((a,b)=>(b.stv/(b.sq+1))-(a.stv/(a.sq+1))).slice(0,15);
   const deadstock=cross.filter(x=>x.stq>0&&x.sq===0&&x.age>=365).sort((a,b)=>b.stv-a.stv).slice(0,15);
