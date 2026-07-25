@@ -251,6 +251,29 @@ table.dt td.num,table.dt th.num{text-align:right;font-variant-numeric:tabular-nu
 .sb-update .u-lbl{font-size:9px;font-weight:700;letter-spacing:.09em;color:#6675a0;text-transform:uppercase}
 .sb-update .u-val{font-size:13px;font-weight:700;color:#fff;margin-top:2px;font-family:'Sora'}
 .sb-update .u-sub{font-size:10px;color:#7f8db0;margin-top:1px}
+.sb-credit{margin:0 4px 12px;padding:10px 12px;border-radius:11px;background:linear-gradient(135deg,rgba(31,95,212,.20),rgba(14,165,163,.16));border:1px solid rgba(255,255,255,.10)}
+.sb-credit .c-lbl{font-size:9px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:#8fa0c8}
+.sb-credit .c-name{font-size:13.5px;font-weight:800;color:#fff;font-family:'Sora';margin-top:2px}
+.sb-credit .c-sub{font-size:10px;color:#9fb0d4;margin-top:3px;line-height:1.4}
+/* SWOT page */
+.swot-grid{display:grid;grid-template-columns:1fr 1fr;gap:15px;margin-bottom:15px}
+.swot-card{border-radius:var(--r);padding:18px;border:1px solid var(--border);position:relative;overflow:hidden;box-shadow:var(--sh-sm)}
+.swot-card .sw-h{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.swot-card .sw-ic{width:38px;height:38px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:19px;color:#fff;flex-shrink:0}
+.swot-card .sw-t{font-size:16px;font-weight:800;font-family:'Sora'}
+.swot-card .sw-s{font-size:11.5px;color:var(--t3);font-weight:500}
+.swot-card ul{list-style:none;margin:0;padding:0}
+.swot-card li{display:flex;gap:9px;padding:8px 0;border-top:1px solid var(--border-lt);font-size:12.8px;line-height:1.5;color:var(--t2)}
+.swot-card li:first-child{border-top:none}
+.swot-card li .li-b{font-size:14px;flex-shrink:0;margin-top:1px}
+.swot-card li b{color:var(--text)}
+.sw-S{background:linear-gradient(160deg,#eafaf3,#fff)}.sw-S .sw-ic{background:var(--green)}
+.sw-W{background:linear-gradient(160deg,#fdf0da,#fff)}.sw-W .sw-ic{background:var(--amber)}
+.sw-O{background:linear-gradient(160deg,#e8f0ff,#fff)}.sw-O .sw-ic{background:var(--brand)}
+.sw-T{background:linear-gradient(160deg,#fce8e8,#fff)}.sw-T .sw-ic{background:var(--red)}
+.sw-badge{display:inline-block;padding:1px 7px;border-radius:20px;font-size:10.5px;font-weight:700;margin-left:auto}
+@media(max-width:1050px){.swot-grid{grid-template-columns:1fr}}
+body.view-mobile .swot-grid{grid-template-columns:1fr}
 
 /* forced device views */
 body.view-mobile .sidebar{transform:translateX(-100%);transition:transform .3s;box-shadow:var(--sh-lg)}
@@ -321,7 +344,7 @@ body.view-desktop .hamb{display:none}
   <aside class="sidebar" id="sidebar">
     <div class="logo-wrap">
       <div class="logo-box">B</div>
-      <div><div class="logo-text">BERCA Retail</div><div class="logo-sub">SAP Sales Intelligence · build C9 ✓ · StockSAP_MD di Status File + snapshot</div></div>
+      <div><div class="logo-text">BERCA Retail</div><div class="logo-sub">SAP Sales Intelligence · build C10 ✓ · halaman SWOT + kredit penyusun</div></div>
     </div>
     <div class="sb-update"><div class="u-lbl" data-i18n="Update Database Terakhir|Last Database Update">Update Database Terakhir</div><div class="u-val" id="sbUpdate">—</div><div class="u-sub" id="sbUpdateSub"></div></div>
     <div class="nav-sec" data-i18n="Ringkasan|Overview">Ringkasan</div>
@@ -335,10 +358,17 @@ body.view-desktop .hamb{display:none}
     <div class="nav-item" data-pg="status" onclick="go('status')"><span class="nav-icon">🔖</span><span data-i18n="By Tipe Dokumen|By Document Type">By Tipe Dokumen</span></div>
     <div class="nav-item" data-pg="pareto" onclick="go('pareto')"><span class="nav-icon">🏆</span><span data-i18n="Pareto Produk|Product Pareto">Pareto Produk</span></div>
     <div class="nav-item" data-pg="stock" onclick="go('stock')"><span class="nav-icon">📦</span><span data-i18n="By Stock|By Stock">By Stock</span></div>
+    <div class="nav-sec" data-i18n="Strategis|Strategic">Strategis</div>
+    <div class="nav-item" data-pg="swot" onclick="go('swot')"><span class="nav-icon">🧭</span><span data-i18n="Analisa SWOT|SWOT Analysis">Analisa SWOT</span></div>
     <div class="nav-sec" data-i18n="Master Data|Master Data">Master Data</div>
     <div class="nav-item" data-pg="pdm" onclick="go('pdm')"><span class="nav-icon">📦</span><span data-i18n="Product Data Master|Product Data Master">Product Data Master</span></div>
     <div class="nav-item" data-pg="upload" onclick="go('upload')"><span class="nav-icon">⬆</span><span data-i18n="Upload Data|Upload Data">Upload Data</span></div>
     <div class="sidebar-footer">
+      <div class="sb-credit">
+        <div class="c-lbl" data-i18n="Disiapkan oleh|Prepared by">Disiapkan oleh</div>
+        <div class="c-name">Brandon Yudha P</div>
+        <div class="c-sub" data-i18n="Kolaborasi Brandon YP × Claude (AI)|Built by Brandon YP × Claude (AI)">Kolaborasi Brandon YP × Claude (AI)</div>
+      </div>
       <div class="user-info"><div class="user-avatar" id="sbAv">A</div><div style="min-width:0"><div class="user-name" id="sbName">Admin</div><div class="user-role" id="sbRole">Super Admin</div></div></div>
       <button class="btn-logout" onclick="doLogout()" data-i18n="Keluar|Log Out">Keluar</button>
     </div>
@@ -374,6 +404,7 @@ body.view-desktop .hamb{display:none}
       <div class="page" id="page-status"></div>
       <div class="page" id="page-pareto"></div>
       <div class="page" id="page-stock"></div>
+      <div class="page" id="page-swot"></div>
       <div class="page" id="page-pdm"></div>
       <div class="page" id="page-upload"></div>
     </div>
@@ -561,6 +592,7 @@ const PG_META={
   status:['Tipe Dokumen','Distribusi Bill.Type & retur','Document Type','Bill.Type distribution & returns'],
   pareto:['Pareto Produk','Kontribusi 80/20 artikel terhadap revenue','Product Pareto','80/20 article contribution to revenue'],
   stock:['Analisa Stock','Persediaan (StockSAP_MD) & keterkaitan dengan penjualan','Stock Analysis','Inventory (StockSAP_MD) & its link to sales'],
+  swot:['Analisa SWOT','Strengths · Weaknesses · Opportunities · Threats (berbasis data sales & stock)','SWOT Analysis','Strengths · Weaknesses · Opportunities · Threats (data-driven)'],
   pdm:['Product Data Master','Master artikel: brand, divisi, umur, warna, harga','Product Data Master','Article master: brand, division, age, color, price'],
   upload:['Upload Data','Muat file Excel SAP','Upload Data','Load SAP Excel files']
 };
@@ -933,7 +965,7 @@ function render(pg){
   if(pg==='stock'){ renderStock(); if(LANG==='en')localize($('page-stock')); return; }
   if(!VIEW) applyFilters();
   ({overview:renderOverview,trend:renderTrend,channel:renderChannel,customer:renderCustomer,
-    product:renderProduct,margin:renderMargin,status:renderStatus,pareto:renderPareto}[pg]||(()=>{}))();
+    product:renderProduct,margin:renderMargin,status:renderStatus,pareto:renderPareto,swot:renderSWOT}[pg]||(()=>{}))();
   if(LANG==='en')localize($('page-'+pg));
 }
 function emptyState(){ return `<div class="empty"><div class="eic">📂</div><h3>${tr('Belum ada data','No data yet')}</h3><p>${tr('Muat file','Load')} <b>SAP-YTD-ALL-SALES.xlsx</b> ${tr('beserta file pendukung (Distribution Channel Master, SAP_COGS_SRP, SAP-PDM) untuk menampilkan dashboard.','plus supporting files (Distribution Channel Master, SAP_COGS_SRP, SAP-PDM) to show the dashboard.')}</p><button class="fbtn primary" style="padding:11px 26px" onclick="go('upload')">⬆ ${tr('Upload Data','Upload Data')}</button></div>`; }
@@ -1229,6 +1261,87 @@ function renderPareto(){
 }
 
 /* ---------- PDM ---------- */
+/* =====================================================================
+   SWOT: data-driven strategic analysis (sales VIEW + stock DATA.stock)
+===================================================================== */
+function renderSWOT(){
+  const A=VIEW; const S=DATA&&DATA.stock;
+  const net=A.net||0, gp=A.gp||0, margin=A.margin||0;
+  const chs=topN(A.ch,60), custs=topN(A.cust,60), divs=topN(A.div,60), brs=topN(A.br,60), arts=topN(A.art,60);
+  const topDiv=divs[0], topBr=brs[0], topArt=arts[0], topCust=custs[0];
+  const custShare=topCust&&net?topCust.net/net*100:0;
+  const top5cust=net?custs.slice(0,5).reduce((s,x)=>s+x.net,0)/net*100:0;
+  const top3ch=net?chs.slice(0,3).reduce((s,x)=>s+x.net,0)/net*100:0;
+  const costGapPct=net?A.costN/net*100:0, costCov=100-costGapPct;
+  const retNet=Object.values(A.tp).reduce((s,t)=>s+(t.net<0?t.net:0),0);
+  const divMg=divs.filter(d=>d.net>0).map(d=>({name:d.name,mg:(d.net-d.cogs)/d.net*100,net:d.net}));
+  const bestMgDiv=divMg.slice().sort((a,b)=>b.mg-a.mg)[0], worstMgDiv=divMg.slice().sort((a,b)=>a.mg-b.mg)[0];
+  const chMg=chs.filter(c=>c.net>0).map(c=>({name:c.name,mg:(c.net-c.cogs)/c.net*100,share:c.net/net*100}));
+  const growCh=chMg.filter(c=>c.share<20&&c.mg>margin).sort((a,b)=>b.mg-a.mg)[0];
+  let deadVal=0,slowVal=0,invVal=0,oldRp=0,agingOldPct=0,coverImplied=null,understockTop=[],deadTop=[];
+  if(S){ deadVal=(S.cross.deadstock||[]).reduce((s,x)=>s+x.stv,0); slowVal=(S.cross.overstock||[]).reduce((s,x)=>s+x.stv,0);
+    invVal=S.totals.val; understockTop=(S.cross.understock||[]).slice(0,3); deadTop=(S.cross.deadstock||[]).slice(0,3);
+    oldRp=Object.keys(S.byAge).filter(k=>/thn/.test(k)).reduce((s,k)=>s+S.byAge[k].val,0); agingOldPct=invVal?oldRp/invVal*100:0;
+    const mo=S.cross.months||6; coverImplied=A.qty?S.totals.qty/(A.qty/mo):null; }
+  const P=[],Wk=[],O=[],Th=[];
+  // STRENGTHS
+  P.push(`Gross margin <b>${pct(margin)}</b> — laba kotor <b>${rpShort(gp)}</b> atas revenue ${rpShort(net)}.`);
+  if(topDiv)P.push(`Divisi <b>${esc(topDiv.name)}</b> memimpin: <b>${rpShort(topDiv.net)}</b> (${pct(topDiv.net/net*100,0)} revenue).`);
+  if(topBr)P.push(`Brand <b>${esc(topBr.name)}</b> dominan — <b>${pct(topBr.net/net*100,0)}</b> dari revenue.`);
+  if(bestMgDiv)P.push(`Profitabilitas terbaik di <b>${esc(bestMgDiv.name)}</b> (margin <b>${pct(bestMgDiv.mg,0)}</b>).`);
+  if(topArt)P.push(`Produk unggulan <b>${esc(topArt.name)}</b>: ${rpShort(topArt.net)} · ${n0(topArt.qty)} unit.`);
+  P.push(`Jangkauan luas: <b>${n0(A.nCust)}</b> customer & <b>${n0(A.nArts)}</b> artikel aktif di ${n0(Object.keys(A.ch).length)} channel.`);
+  // WEAKNESSES
+  if(costGapPct>1)Wk.push(`<b>${pct(costGapPct,0)}</b> revenue (${rpShort(A.costN)}) tanpa data COGS valid — margin sebagian tak terukur.`);
+  if(worstMgDiv&&worstMgDiv.name!==(bestMgDiv&&bestMgDiv.name))Wk.push(`Margin terendah di <b>${esc(worstMgDiv.name)}</b> (<b>${pct(worstMgDiv.mg,0)}</b>) — perlu evaluasi harga/diskon.`);
+  if(retNet<0)Wk.push(`Retur/koreksi <b>${rpShort(retNet)}</b> menekan revenue bersih.`);
+  if(custShare>20)Wk.push(`Ketergantungan tinggi pada <b>${esc(topCust.name)}</b> (<b>${pct(custShare,0)}</b> revenue).`);
+  if(S){ if(agingOldPct>0)Wk.push(`<b>${pct(agingOldPct,0)}</b> nilai stok berumur >1 thn (${rpShort(oldRp)}) — modal mengendap.`); if(slowVal>0)Wk.push(`Slow-moving/overstock mengikat <b>${rpShort(slowVal)}</b> modal.`); }
+  else Wk.push(`Data stok belum dimuat — analisa aging & dead-stock belum lengkap (upload StockSAP_MD).`);
+  // OPPORTUNITIES
+  if(S&&understockTop.length)O.push(`Restock cepat item laris tapi stok tipis/habis: <b>${understockTop.map(x=>esc(x.gen)).join(', ')}</b> — permintaan nyata.`);
+  if(bestMgDiv)O.push(`Perbesar porsi <b>${esc(bestMgDiv.name)}</b> (margin ${pct(bestMgDiv.mg,0)}) untuk angkat laba total.`);
+  if(growCh)O.push(`Channel <b>${esc(growCh.name)}</b> margin ${pct(growCh.mg,0)} di atas rata-rata, share baru ${pct(growCh.share,0)} — ruang ekspansi.`);
+  if(S&&coverImplied!=null&&coverImplied<3)O.push(`Stock cover total ~<b>${coverImplied.toFixed(1)} bln</b> — permintaan kuat, aman menambah stok fast-mover.`);
+  O.push(`Bundling & cross-sell top-mover ke customer bernilai tinggi untuk naikkan basket size.`);
+  O.push(`Diversifikasi customer baru untuk kurangi konsentrasi pada Top-5 (${pct(top5cust,0)}).`);
+  // THREATS
+  if(S&&deadVal>0)Th.push(`Dead-stock <b>${rpShort(deadVal)}</b> (umur ≥1thn, 0 penjualan) — risiko write-down${deadTop.length?': '+esc(deadTop[0].gen):''}.`);
+  if(top5cust>0)Th.push(`Konsentrasi: Top-5 customer = <b>${pct(top5cust,0)}</b> revenue; Top-3 channel = <b>${pct(top3ch,0)}</b> — kehilangan salah satu berdampak besar.`);
+  if(S&&coverImplied!=null&&coverImplied>12)Th.push(`Stock cover ~<b>${coverImplied.toFixed(0)} bln</b> — persediaan jauh di atas laju jual, risiko obsolescence.`);
+  if(retNet<0)Th.push(`Tren retur perlu dipantau agar tidak menggerus margin lebih jauh.`);
+  Th.push(`Stok season lama menua bila tak segera dilikuidasi; kompetisi & diskon pasar menekan margin.`);
+  // health scorecards
+  const score=(v,g,a)=>v>=g?'g':v>=a?'a':'r';
+  const invHealth = S? (invVal? (deadVal+slowVal)/invVal*100 : 0) : null;
+  const chips=[
+    ['Gross Margin',pct(margin),score(margin,45,30)],
+    ['Kelengkapan COGS',pct(costCov,0),score(costCov,90,70)],
+    ['Konsentrasi Top-5 Cust',pct(top5cust,0),top5cust<=50?'g':top5cust<=70?'a':'r'],
+    S? ['Modal Terikat (dead+slow)',pct(invHealth||0,0),invHealth<=15?'g':invHealth<=30?'a':'r'] : ['Data Stock','belum','a'],
+    S&&coverImplied!=null? ['Stock Cover',coverImplied.toFixed(1)+' bln',coverImplied>=1&&coverImplied<=6?'g':coverImplied<=12?'a':'r'] : null
+  ].filter(Boolean);
+  const quad=(cls,ic,title,sub,items,badge,badgeCls)=>`<div class="swot-card ${cls}"><div class="sw-h"><div class="sw-ic">${ic}</div><div><div class="sw-t">${title}</div><div class="sw-s">${sub}</div></div><span class="sw-badge tag ${badgeCls}">${badge}</span></div><ul>${items.map(t=>`<li><span class="li-b">•</span><span>${t}</span></li>`).join('')}</ul></div>`;
+  const verdict = margin>=40 && top5cust<=60 ? tr('Posisi kuat & profitabel','Strong & profitable') : (top5cust>70||margin<25?tr('Perlu perhatian','Needs attention'):tr('Sehat dengan area perbaikan','Healthy with room to improve'));
+  const html=`
+  <div class="kpi-grid">
+    ${chips.map((c,i)=>kpi(c[0],c[1],'',c[2]==='g'?'k-green':c[2]==='a'?'k-amber':'k-red', c[2]==='g'?'✅':c[2]==='a'?'⚠️':'⛔', c[2]==='g'?'var(--green-l)':c[2]==='a'?'var(--amber-l)':'var(--red-l)')).join('')}
+  </div>
+  <div class="card" style="background:linear-gradient(135deg,#0f1b38,#123f97);color:#fff;border:none">
+    <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap"><div style="font-size:26px">🧭</div>
+    <div style="flex:1;min-width:220px"><div style="font-size:15px;font-weight:800;font-family:'Sora'">${tr('Ringkasan Strategis','Strategic Summary')} — ${esc(verdict)}</div>
+    <div style="font-size:12.5px;opacity:.88;margin-top:4px;line-height:1.6">${tr('Revenue','Revenue')} <b>${rpShort(net)}</b> · ${tr('margin','margin')} <b>${pct(margin)}</b> · ${n0(A.nCust)} customer · ${n0(A.nArts)} artikel${S?` · ${tr('nilai stok','stock value')} <b>${rpShort(invVal)}</b> · dead-stock <b>${rpShort(deadVal)}</b>`:` · ${tr('data stok belum dimuat','stock not loaded')}`}. ${tr('Fokus: dorong divisi/kanal margin tinggi, kurangi konsentrasi pelanggan, dan bersihkan dead-stock.','Focus: push high-margin divisions/channels, reduce customer concentration, and clear dead-stock.')}</div></div></div>
+  </div>
+  <div class="swot-grid">
+    ${quad('sw-S','💪',tr('Strengths (Kekuatan)','Strengths'),tr('keunggulan yang bisa diandalkan','core advantages'),P,'S','g')}
+    ${quad('sw-W','🛠',tr('Weaknesses (Kelemahan)','Weaknesses'),tr('area yang perlu dibenahi','areas to fix'),Wk,'W','a')}
+    ${quad('sw-O','🚀',tr('Opportunities (Peluang)','Opportunities'),tr('potensi pertumbuhan','growth potential'),O,'O','b')}
+    ${quad('sw-T','⚠️',tr('Threats (Ancaman)','Threats'),tr('risiko yang harus diwaspadai','risks to watch'),Th,'T','r')}
+  </div>
+  <div class="card" style="background:var(--surface-2)"><div class="card-title" style="margin-bottom:8px">ℹ️ ${tr('Dasar analisa','Basis')}</div><p style="font-size:12.5px;color:var(--t2);line-height:1.7">${tr('SWOT dihitung otomatis dari data','SWOT is auto-computed from')} <b>SAP-YTD-ALL-SALES</b> (revenue, margin, channel, customer, produk)${S?` ${tr('dan','and')} <b>StockSAP_MD</b> (${tr('nilai stok, umur, dead-stock, stock cover','stock value, aging, dead-stock, cover')})`:` — ${tr('muat StockSAP_MD untuk melengkapi sisi persediaan','load StockSAP_MD to complete the inventory side')}`}. ${tr('Angka mengikuti filter aktif & identik dengan data sumber.','Figures follow active filters and match the source data.')}</p></div>`;
+  $('page-swot').innerHTML=html;
+}
+
 /* =====================================================================
    STOCK: engine (StockSAP_MD) + cross-analysis with sales
 ===================================================================== */
