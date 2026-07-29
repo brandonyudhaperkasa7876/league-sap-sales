@@ -12,22 +12,24 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#eef1f6; --bg2:#e6eaf2; --surface:#ffffff; --surface-2:#f7f9fc;
-  --border:#e3e7ef; --border-lt:#eef1f6;
-  --text:#131722; --t2:#59617a; --t3:#98a0b5;
-  --brand:#1f5fd4; --brand-d:#123f97; --brand-l:#e8f0ff;
-  --teal:#0ea5a3; --teal-l:#dbf5f4;
-  --green:#12a06a; --green-l:#dcf5ea;
-  --amber:#d98a12; --amber-l:#fdf0da;
-  --red:#d64545; --red-l:#fce8e8;
-  --purple:#6d5ae0; --purple-l:#ece9fd;
-  --pink:#d6479a; --sky:#2ea3f2;
-  --grad: linear-gradient(135deg,#1f5fd4 0%,#3b8ff0 55%,#0ea5a3 100%);
-  --grad-dark: linear-gradient(150deg,#0f1f4a 0%,#123f97 55%,#0b6b6a 100%);
+  --bg:#f3f1ea; --bg2:#ebe7dd; --surface:#ffffff; --surface-2:#faf8f2;
+  --border:#e7e2d6; --border-lt:#f1ede4;
+  --text:#151824; --t2:#5a6072; --t3:#99a0ad;
+  --brand:#1e3357; --brand-d:#0c1526; --brand-l:#e9edf4;
+  --gold:#c39b45; --gold-d:#a07f33; --gold-l:#f6eeda;
+  --teal:#0f766e; --teal-l:#dcefec;
+  --green:#1e8f2a; --green-l:#e1f2e3;
+  --amber:#b7791f; --amber-l:#f7ecd6;
+  --red:#b4423a; --red-l:#f7e4e2;
+  --purple:#5b4bc4; --purple-l:#e9e6f8;
+  --pink:#b13c86; --sky:#2f6fb0;
+  --grad: linear-gradient(135deg,#16264a 0%,#2c4a7a 60%,#0f766e 100%);
+  --grad-gold: linear-gradient(135deg,#c9a24a 0%,#e6cd84 100%);
+  --grad-dark: linear-gradient(150deg,#0a1122 0%,#132241 55%,#0c2b44 100%);
   --sw:246px; --hh:62px; --r:14px; --r-sm:10px;
-  --sh-sm:0 1px 2px rgba(16,24,40,.05),0 1px 3px rgba(16,24,40,.06);
-  --sh:0 4px 14px rgba(16,24,40,.07),0 2px 4px rgba(16,24,40,.05);
-  --sh-lg:0 18px 40px rgba(16,24,40,.14);
+  --sh-sm:0 1px 2px rgba(20,25,40,.04),0 1px 3px rgba(20,25,40,.05);
+  --sh:0 6px 20px -6px rgba(20,25,40,.10),0 2px 6px rgba(20,25,40,.05);
+  --sh-lg:0 24px 52px -18px rgba(20,25,40,.22);
 }
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%}
@@ -78,15 +80,16 @@ button{font-family:inherit}
 
 /* ===== APP SHELL ===== */
 #appShell{display:none;min-height:100vh}
-.sidebar{width:var(--sw);background:#0f1b38;color:#c3ccdf;display:flex;flex-direction:column;position:fixed;top:0;left:0;height:100vh;z-index:100;overflow-y:auto}
-.sidebar::-webkit-scrollbar-thumb{background:#2a3a5f;border-color:#0f1b38}
+.sidebar{width:var(--sw);background:linear-gradient(185deg,#0c1526 0%,#0a1120 100%);color:#c3ccdf;display:flex;flex-direction:column;position:fixed;top:0;left:0;height:100vh;z-index:100;overflow:hidden;border-right:1px solid rgba(201,162,74,.14)}
+.sidebar::-webkit-scrollbar-thumb{background:#2a3a5f;border-color:#0c1526}
 .logo-wrap{padding:18px 18px;display:flex;align-items:center;gap:11px;flex-shrink:0}
 .logo-box{width:40px;height:40px;background:var(--grad);border-radius:11px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:15px;font-weight:800;flex-shrink:0;box-shadow:0 6px 16px rgba(31,95,212,.4)}
 .logo-text{font-size:15px;font-weight:800;color:#fff;font-family:'Sora'}.logo-sub{font-size:10.5px;color:#7f8db0;margin-top:1px;letter-spacing:.03em}
 .nav-sec{padding:16px 20px 7px;font-size:10px;font-weight:700;letter-spacing:.11em;color:#6675a0;text-transform:uppercase}
 .nav-item{display:flex;align-items:center;gap:11px;padding:9px 14px;margin:2px 12px;border-radius:10px;cursor:pointer;color:#b3bcd4;font-size:13px;font-weight:500;transition:.15s;user-select:none;position:relative}
 .nav-item:hover{background:rgba(255,255,255,.06);color:#fff}
-.nav-item.active{background:var(--grad);color:#fff;font-weight:600;box-shadow:0 6px 16px rgba(31,95,212,.35)}
+.nav-item.active{background:linear-gradient(135deg,#c9a24a 0%,#e2c377 100%);color:#1a1205;font-weight:700;box-shadow:0 7px 18px -4px rgba(201,162,74,.42)}
+.nav-item.active .nav-icon{filter:none}
 .nav-icon{font-size:15px;width:18px;text-align:center}
 .sidebar-footer{margin-top:auto;padding:14px 16px;border-top:1px solid rgba(255,255,255,.08);flex-shrink:0}
 .user-info{display:flex;align-items:center;gap:10px;margin-bottom:10px}
@@ -300,6 +303,25 @@ body.view-mobile .brand-hero{padding:15px 17px}
 body.view-mobile .bh-right{text-align:left}
 body.view-mobile .bh-brand{font-size:26px}
 body.view-mobile .bh-clock{font-size:26px}
+/* ===== sidebar branding (baru, tetap/diam) ===== */
+.sb-top{flex-shrink:0;padding:16px 15px 4px}
+.sb-brandrow{display:flex;align-items:center;gap:12px;min-width:0}
+.sb-logo-l{flex:none;width:48px;height:44px;background:#fff;border-radius:12px;display:flex;align-items:center;justify-content:center;padding:5px;box-shadow:0 5px 14px -5px rgba(0,0,0,.55)}
+.sb-logo-l svg{width:100%;height:100%;display:block}
+.sb-brandtxt{min-width:0}
+.sb-company{font-size:9px;font-weight:700;letter-spacing:.13em;text-transform:uppercase;color:#9fead0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sb-brand{font-family:'Sora';font-weight:800;font-size:20px;line-height:1.05;color:#fff;letter-spacing:.02em;display:flex;align-items:flex-start;gap:2px}
+.sb-brand .tm{font-size:9px;color:#8ede7f;margin-top:2px;font-weight:700}
+.sb-tag{font-size:9px;color:#8fa0c8;margin-top:3px;line-height:1.3}
+.sb-clockbox{flex-shrink:0;margin:12px 12px 8px;padding:11px 13px;border-radius:13px;background:linear-gradient(140deg,rgba(60,176,67,.15),rgba(31,95,212,.12));border:1px solid rgba(255,255,255,.09);text-align:center}
+.sb-clock{font-family:'Sora';font-weight:800;font-size:27px;color:#fff;letter-spacing:.05em;font-variant-numeric:tabular-nums;line-height:1}
+.sb-clockdate{font-size:11px;color:#b7c4e0;margin-top:5px}
+.sb-clocklive{display:inline-flex;align-items:center;gap:6px;margin-top:7px;font-size:9px;font-weight:700;letter-spacing:.13em;text-transform:uppercase;color:#8ede7f}
+.sb-clocklive .dot{width:6px;height:6px;border-radius:50%;background:#3cb043;animation:bhpulse 1.6s infinite}
+.sb-nav{flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;padding-bottom:6px}
+.sidebar-footer .sb-credit-top{margin:0 0 10px}
+.sidebar-footer .sb-update{margin:0 0 10px}
+.sb-build{font-size:8px;color:#5f6f92;text-align:center;padding:8px 6px 0;letter-spacing:.02em}
 /* SWOT page */
 .swot-grid{display:grid;grid-template-columns:1fr 1fr;gap:15px;margin-bottom:15px}
 .swot-card{border-radius:var(--r);padding:18px;border:1px solid var(--border);position:relative;overflow:hidden;box-shadow:var(--sh-sm)}
@@ -387,40 +409,56 @@ body.view-desktop .hamb{display:none}
 <div id="appShell">
   <div class="backdrop" id="backdrop" onclick="closeSidebar()"></div>
   <aside class="sidebar" id="sidebar">
-    <div class="logo-wrap">
-      <div class="logo-box">B</div>
-      <div><div class="logo-text">BERCA Retail</div><div class="logo-sub">SAP Sales Intelligence · build C16 ✓ · logo LEAGUE tertanam (SVG) 1-file</div></div>
-    </div>
-    <div class="sb-credit-top">
-      <div class="cr-row">
-        <div class="cr-mono">BP</div>
-        <div style="min-width:0">
-          <div class="cr-lbl" data-i18n="Disusun oleh|Prepared by">Disusun oleh</div>
-          <div class="cr-name">Brandon Yudha P</div>
+    <div class="sb-top">
+      <div class="sb-brandrow">
+        <div class="sb-logo-l"><svg viewBox="0 0 800 800" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" aria-label="LEAGUE"><path d="M320 175 L480 175 Q512 177 522 215 L648 600 Q662 642 622 645 L178 645 Q138 642 152 600 L278 215 Q288 177 320 175 Z" fill="#ffffff" stroke="#0a0a0a" stroke-width="36" stroke-linejoin="round"/><path d="M315 205 L425 205 L395 500 L530 500 L545 600 L290 600 Z" fill="#1e8f2a"/></svg></div>
+        <div class="sb-brandtxt">
+          <div class="sb-company">PT. Berca Sportindo</div>
+          <div class="sb-brand">LEAGUE<span class="tm">&trade;</span></div>
+          <div class="sb-tag">Lead The Way · <span data-i18n="Intelijen Penjualan SAP|SAP Sales Intelligence">Intelijen Penjualan SAP</span></div>
         </div>
       </div>
-      <div class="cr-sub"><span class="spark">✦</span><span data-i18n="Hasil kolaborasi dengan Claude (AI)|In collaboration with Claude (AI)">Hasil kolaborasi dengan Claude (AI)</span></div>
+      <div class="sb-clockbox">
+        <div class="sb-clock" id="sbClock">--:--:--</div>
+        <div class="sb-clockdate" id="sbClockDate">—</div>
+        <div class="sb-clocklive"><span class="dot"></span><span data-i18n="LANGSUNG|LIVE">LANGSUNG</span></div>
+      </div>
     </div>
-    <div class="sb-update"><div class="u-lbl" data-i18n="Update Database Terakhir|Last Database Update">Update Database Terakhir</div><div class="u-val" id="sbUpdate">—</div><div class="u-sub" id="sbUpdateSub"></div></div>
-    <div class="nav-sec" data-i18n="Ringkasan|Overview">Ringkasan</div>
-    <div class="nav-item active" data-pg="overview" onclick="go('overview')"><span class="nav-icon">📊</span><span data-i18n="Dashboard Utama|Main Dashboard">Dashboard Utama</span></div>
-    <div class="nav-item" data-pg="trend" onclick="go('trend')"><span class="nav-icon">📈</span><span data-i18n="Tren Bulanan|Monthly Trend">Tren Bulanan</span></div>
-    <div class="nav-sec" data-i18n="Analisis|Analysis">Analisis</div>
-    <div class="nav-item" data-pg="channel" onclick="go('channel')"><span class="nav-icon">🛒</span><span data-i18n="By Channel|By Channel">By Channel</span></div>
-    <div class="nav-item" data-pg="customer" onclick="go('customer')"><span class="nav-icon">🧑‍💼</span><span data-i18n="By Customer|By Customer">By Customer</span></div>
-    <div class="nav-item" data-pg="product" onclick="go('product')"><span class="nav-icon">👟</span><span data-i18n="By Produk|By Product">By Produk</span></div>
-    <div class="nav-item" data-pg="margin" onclick="go('margin')"><span class="nav-icon">💹</span><span data-i18n="Margin & COGS|Margin & COGS">Margin & COGS</span></div>
-    <div class="nav-item" data-pg="status" onclick="go('status')"><span class="nav-icon">🔖</span><span data-i18n="By Tipe Dokumen|By Document Type">By Tipe Dokumen</span></div>
-    <div class="nav-item" data-pg="pareto" onclick="go('pareto')"><span class="nav-icon">🏆</span><span data-i18n="Pareto Produk|Product Pareto">Pareto Produk</span></div>
-    <div class="nav-item" data-pg="stock" onclick="go('stock')"><span class="nav-icon">📦</span><span data-i18n="By Stock|By Stock">By Stock</span></div>
-    <div class="nav-sec" data-i18n="Strategis|Strategic">Strategis</div>
-    <div class="nav-item" data-pg="swot" onclick="go('swot')"><span class="nav-icon">🧭</span><span data-i18n="Analisa SWOT|SWOT Analysis">Analisa SWOT</span></div>
-    <div class="nav-sec" data-i18n="Master Data|Master Data">Master Data</div>
-    <div class="nav-item" data-pg="pdm" onclick="go('pdm')"><span class="nav-icon">📦</span><span data-i18n="Product Data Master|Product Data Master">Product Data Master</span></div>
-    <div class="nav-item" data-pg="upload" onclick="go('upload')"><span class="nav-icon">⬆</span><span data-i18n="Upload Data|Upload Data">Upload Data</span></div>
+    <nav class="sb-nav">
+      <div class="nav-sec" data-i18n="Ringkasan|Overview">Ringkasan</div>
+      <div class="nav-item active" data-pg="overview" onclick="go('overview')"><span class="nav-icon">📊</span><span data-i18n="Dashboard Utama|Main Dashboard">Dashboard Utama</span></div>
+      <div class="nav-item" data-pg="trend" onclick="go('trend')"><span class="nav-icon">📈</span><span data-i18n="Tren Bulanan|Monthly Trend">Tren Bulanan</span></div>
+      <div class="nav-sec" data-i18n="Analisis|Analysis">Analisis</div>
+      <div class="nav-item" data-pg="channel" onclick="go('channel')"><span class="nav-icon">🛒</span><span data-i18n="By Channel|By Channel">By Channel</span></div>
+      <div class="nav-item" data-pg="customer" onclick="go('customer')"><span class="nav-icon">🧑‍💼</span><span data-i18n="By Customer|By Customer">By Customer</span></div>
+      <div class="nav-item" data-pg="product" onclick="go('product')"><span class="nav-icon">👟</span><span data-i18n="By Produk|By Product">By Produk</span></div>
+      <div class="nav-item" data-pg="margin" onclick="go('margin')"><span class="nav-icon">💹</span><span data-i18n="Margin & COGS|Margin & COGS">Margin & COGS</span></div>
+      <div class="nav-item" data-pg="status" onclick="go('status')"><span class="nav-icon">🔖</span><span data-i18n="By Tipe Dokumen|By Document Type">By Tipe Dokumen</span></div>
+      <div class="nav-item" data-pg="pareto" onclick="go('pareto')"><span class="nav-icon">🏆</span><span data-i18n="Pareto Produk|Product Pareto">Pareto Produk</span></div>
+      <div class="nav-item" data-pg="stock" onclick="go('stock')"><span class="nav-icon">📦</span><span data-i18n="By Stock|By Stock">By Stock</span></div>
+      <div class="nav-sec" data-i18n="Strategis|Strategic">Strategis</div>
+      <div class="nav-item" data-pg="swot" onclick="go('swot')"><span class="nav-icon">🧭</span><span data-i18n="Analisa SWOT|SWOT Analysis">Analisa SWOT</span></div>
+      <div class="nav-sec" data-i18n="Master Data|Master Data">Master Data</div>
+      <div class="nav-item" data-pg="pdm" onclick="go('pdm')"><span class="nav-icon">📦</span><span data-i18n="Product Data Master|Product Data Master">Product Data Master</span></div>
+      <div class="nav-sec" data-i18n="Sistem|System">Sistem</div>
+      <div class="nav-item" data-pg="dbstatus" onclick="go('dbstatus')"><span class="nav-icon">🗂️</span><span data-i18n="Status Update Data|Database Update Status">Status Update Data</span></div>
+      <div class="nav-item" data-pg="upload" onclick="go('upload')"><span class="nav-icon">⬆</span><span data-i18n="Upload Data|Upload Data">Upload Data</span></div>
+    </nav>
     <div class="sidebar-footer">
+      <div class="sb-credit-top">
+        <div class="cr-row">
+          <div class="cr-mono">BP</div>
+          <div style="min-width:0">
+            <div class="cr-lbl" data-i18n="Disusun oleh|Prepared by">Disusun oleh</div>
+            <div class="cr-name">Brandon Yudha P</div>
+          </div>
+        </div>
+        <div class="cr-sub"><span class="spark">✦</span><span data-i18n="Hasil kolaborasi dengan Claude (AI)|In collaboration with Claude (AI)">Hasil kolaborasi dengan Claude (AI)</span></div>
+      </div>
+      <div class="sb-update"><div class="u-lbl" data-i18n="Update Database Terakhir|Last Database Update">Update Database Terakhir</div><div class="u-val" id="sbUpdate">—</div><div class="u-sub" id="sbUpdateSub"></div></div>
       <div class="user-info"><div class="user-avatar" id="sbAv">A</div><div style="min-width:0"><div class="user-name" id="sbName">Admin</div><div class="user-role" id="sbRole">Super Admin</div></div></div>
       <button class="btn-logout" onclick="doLogout()" data-i18n="Keluar|Log Out">Keluar</button>
+      <div class="sb-build">SAP Sales Intelligence · build C18 ✓ · tema Navy+Emas</div>
     </div>
   </aside>
 
@@ -456,6 +494,7 @@ body.view-desktop .hamb{display:none}
       <div class="page" id="page-stock"></div>
       <div class="page" id="page-swot"></div>
       <div class="page" id="page-pdm"></div>
+      <div class="page" id="page-dbstatus"></div>
       <div class="page" id="page-upload"></div>
     </div>
   </main>
@@ -492,7 +531,7 @@ function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;',
 function toast(msg,type){ const t=$('toast'); t.textContent=msg; t.className='toast show '+(type||''); setTimeout(()=>t.className='toast '+(type||''),2600); }
 const MONTHS=['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
 const MONTHS_EN=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-const PALETTE=['#1f5fd4','#0ea5a3','#12a06a','#d98a12','#6d5ae0','#d6479a','#2ea3f2','#d64545','#8b5cf6','#059669','#f59e0b','#0891b2'];
+const PALETTE=['#1e3357','#c39b45','#0f766e','#1e8f2a','#5b4bc4','#b13c86','#2f6fb0','#b4423a','#3a7d6e','#8a6d1f','#4a5a86','#0f8a8a'];
 
 /* ---------- auth ---------- */
 function users(){ try{return JSON.parse(localStorage.getItem('berca_users')||'[]');}catch(e){return [];} }
@@ -525,6 +564,7 @@ function enterApp(mode,u){
   // Upload Data hanya untuk Super Admin
   const upNav=document.querySelector('[data-pg="upload"]'); if(upNav) upNav.style.display=isSuperAdmin()?'flex':'none';
   applyLang(); applyDevice();
+  startBrandClock();
   restoreData();
   setUpdateInfo();
   // restore last viewed page (upload needs PIN, so fall back to overview)
@@ -648,6 +688,7 @@ const PG_META={
   stock:['Analisa Stock','Persediaan (StockSAP_MD) & keterkaitan dengan penjualan','Stock Analysis','Inventory (StockSAP_MD) & its link to sales'],
   swot:['Analisa SWOT — Brand LEAGUE & LEGAS','Strengths · Weaknesses · Opportunities · Threats (khusus brand LEAGUE & LEGAS)','SWOT — LEAGUE & LEGAS','Strengths · Weaknesses · Opportunities · Threats (LEAGUE & LEGAS only)'],
   pdm:['Product Data Master','Master artikel: brand, divisi, umur, warna, harga','Product Data Master','Article master: brand, division, age, color, price'],
+  dbstatus:['Database Update Status','Tanggal transaksi terbaru pada tiap file Excel sumber','Database Update Status','Latest transaction date in each source Excel file'],
   upload:['Upload Data','Muat file Excel SAP','Upload Data','Load SAP Excel files']
 };
 function isSuperAdmin(){ return !!(CUR && CUR.role==='Super Admin'); }
@@ -661,7 +702,7 @@ function go(pg){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   $('page-'+pg).classList.add('active');
   $('pgTitle').textContent=PG_META[pg][LANG==='en'?2:0]; $('pgSub').textContent=PG_META[pg][LANG==='en'?3:1];
-  $('filterBar').style.display=(pg==='upload'||pg==='pdm')?'none':'flex';
+  $('filterBar').style.display=(pg==='upload'||pg==='pdm'||pg==='dbstatus')?'none':'flex';
   closeSidebar();
   render(pg);
 }
@@ -1017,6 +1058,7 @@ function render(pg){
   if(pg==='upload'){ renderUpload(); if(LANG==='en')localize($('page-upload')); return; }
   if(!DATA){ $('page-'+pg).innerHTML=emptyState(); return; }
   if(pg==='pdm'){ renderPDM(); if(LANG==='en')localize($('page-pdm')); return; }
+  if(pg==='dbstatus'){ renderDbStatus(); if(LANG==='en')localize($('page-dbstatus')); return; }
   if(pg==='stock'){ renderStock(); if(LANG==='en')localize($('page-stock')); return; }
   if(!VIEW) applyFilters();
   ({overview:renderOverview,trend:renderTrend,channel:renderChannel,customer:renderCustomer,
@@ -1029,29 +1071,11 @@ function kpi(label,val,sub,cls,ic,icbg){ return `<div class="kpi ${cls||''}"><di
 function topN(o,n,by){ by=by||'net'; return arr(o).sort((a,b)=>(b[by]||0)-(a[by]||0)).slice(0,n); }
 
 /* ---------- OVERVIEW ---------- */
-/* ---------- brand hero + live clock (halaman utama) ---------- */
-function brandHero(){
-  return `
-  <div class="brand-hero">
-    <div class="bh-left">
-      <div class="bh-logo"><svg viewBox="0 0 800 800" width="100%" height="100%" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" aria-label="LEAGUE"><path d="M320 175 L480 175 Q512 177 522 215 L648 600 Q662 642 622 645 L178 645 Q138 642 152 600 L278 215 Q288 177 320 175 Z" fill="#ffffff" stroke="#0a0a0a" stroke-width="36" stroke-linejoin="round"/><path d="M315 205 L425 205 L395 500 L530 500 L545 600 L290 600 Z" fill="#1e8f2a"/></svg></div>
-      <div class="bh-txt">
-        <div class="bh-company">PT. Berca Sportindo</div>
-        <div class="bh-brand">LEAGUE<span class="bh-tm">&trade;</span></div>
-        <div class="bh-tag">${tr('Lead The Way · Intelijen Penjualan SAP','Lead The Way · SAP Sales Intelligence')}</div>
-      </div>
-    </div>
-    <div class="bh-right">
-      <div class="bh-clock" id="brandClock">--:--:--</div>
-      <div class="bh-date" id="brandDate">—</div>
-      <div class="bh-live"><span class="dot"></span>${tr('LANGSUNG','LIVE')}</div>
-    </div>
-  </div>`;
-}
+/* ---------- live clock (sidebar) ---------- */
 let BRAND_CLOCK_TIMER=null;
 function updateBrandClock(){
-  const c=document.getElementById('brandClock'), d=document.getElementById('brandDate');
-  if(!c && !d){ if(BRAND_CLOCK_TIMER){ clearInterval(BRAND_CLOCK_TIMER); BRAND_CLOCK_TIMER=null; } return; }
+  const c=document.getElementById('sbClock'), d=document.getElementById('sbClockDate');
+  if(!c && !d) return;
   const now=new Date(), p=n=>String(n).padStart(2,'0');
   const daysID=['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
   const daysEN=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
@@ -1084,16 +1108,15 @@ function renderOverview(){
     <div class="card"><div class="card-hdr"><div><div class="card-title">Top 8 Customer</div><div class="card-sub">by revenue</div></div></div><div class="chart-wrap sm"><canvas id="c-ovLoc"></canvas></div></div>
   </div>
   <div class="card"><div class="card-hdr"><div><div class="card-title">Ringkasan Channel</div><div class="card-sub">Revenue, unit, margin & kontribusi</div></div></div>${chTable(A)}</div>`;
-  $('page-overview').innerHTML=brandHero()+html;
-  startBrandClock();
+  $('page-overview').innerHTML=html;
   // charts
-  mk('c-ovMonth',{type:'bar',data:{labels:DATA.meta.months.map(mo=>MONTHS[mo-1]),datasets:[{label:'Revenue',data:mrev,backgroundColor:c=>grad(c.chart.ctx,'#3b8ff0','#1f5fd4'),borderRadius:7,maxBarThickness:54}]},
+  mk('c-ovMonth',{type:'bar',data:{labels:DATA.meta.months.map(mo=>MONTHS[mo-1]),datasets:[{label:'Revenue',data:mrev,backgroundColor:c=>grad(c.chart.ctx,'#2c4a7a','#16264a'),borderRadius:7,maxBarThickness:54}]},
     options:{maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:ttMoney()},scales:{x:{grid:{display:false}},y:axisMoney()}}});
   const chs=topN(A.ch,8);
   mk('c-ovChannel',{type:'doughnut',data:{labels:chs.map(c=>c.name),datasets:[{data:chs.map(c=>c.net),backgroundColor:PALETTE,borderWidth:2,borderColor:'#fff'}]},
     options:{maintainAspectRatio:false,cutout:'62%',plugins:{legend:{position:'bottom'},tooltip:{callbacks:{label:c=>' '+c.label+': '+rp(c.parsed)+' ('+pct(c.parsed/A.net*100)+')'}}}}});
   const dvs=topN(A.div,8);
-  mk('c-ovDiv',{type:'bar',data:{labels:dvs.map(d=>d.name),datasets:[{label:'Revenue',data:dvs.map(d=>d.net),backgroundColor:'#0ea5a3',borderRadius:6,maxBarThickness:34}]},
+  mk('c-ovDiv',{type:'bar',data:{labels:dvs.map(d=>d.name),datasets:[{label:'Revenue',data:dvs.map(d=>d.net),backgroundColor:'#0f766e',borderRadius:6,maxBarThickness:34}]},
     options:{indexAxis:'y',maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:ttMoney()},scales:{x:axisMoney(),y:{grid:{display:false}}}}});
   const locs=topN(A.cust,8);
   mk('c-ovLoc',{type:'bar',data:{labels:locs.map(l=>l.name),datasets:[{label:'Revenue',data:locs.map(l=>l.net),backgroundColor:'#6d5ae0',borderRadius:6,maxBarThickness:34}]},
@@ -1127,10 +1150,10 @@ function renderTrend(){
   $('page-trend').innerHTML=html; drawTrend();
   // sub charts
   mk('c-trRevCogs',{type:'bar',data:{labels:mos.map(mo=>MONTHS[mo-1]),datasets:[
-    {label:'Net Revenue',data:mos.map(mo=>A.month[mo]?A.month[mo].net:0),backgroundColor:'#1f5fd4',borderRadius:6},
-    {label:'COGS',data:mos.map(mo=>A.month[mo]?A.month[mo].cogs:0),backgroundColor:'#d98a12',borderRadius:6}]},
+    {label:'Net Revenue',data:mos.map(mo=>A.month[mo]?A.month[mo].net:0),backgroundColor:'#1e3357',borderRadius:6},
+    {label:'COGS',data:mos.map(mo=>A.month[mo]?A.month[mo].cogs:0),backgroundColor:'#b7791f',borderRadius:6}]},
     options:{maintainAspectRatio:false,plugins:{tooltip:ttMoney()},scales:{x:{grid:{display:false}},y:axisMoney()}}});
-  mk('c-trMargin',{type:'line',data:{labels:mos.map(mo=>MONTHS[mo-1]),datasets:[{label:'Margin %',data:mos.map(mo=>{const m=A.month[mo];return m&&m.net?((m.net-m.cogs)/m.net*100):0;}),borderColor:'#12a06a',backgroundColor:c=>grad(c.chart.ctx,'rgba(18,160,106,.25)','rgba(18,160,106,0)'),fill:true,tension:.35,borderWidth:3,pointRadius:4,pointBackgroundColor:'#12a06a'}]},
+  mk('c-trMargin',{type:'line',data:{labels:mos.map(mo=>MONTHS[mo-1]),datasets:[{label:'Margin %',data:mos.map(mo=>{const m=A.month[mo];return m&&m.net?((m.net-m.cogs)/m.net*100):0;}),borderColor:'#1e8f2a',backgroundColor:c=>grad(c.chart.ctx,'rgba(18,160,106,.25)','rgba(18,160,106,0)'),fill:true,tension:.35,borderWidth:3,pointRadius:4,pointBackgroundColor:'#1e8f2a'}]},
     options:{maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>' Margin: '+pct(c.parsed.y)}}},scales:{x:{grid:{display:false}},y:{grid:{color:gridClr},ticks:{callback:v=>v+'%'}}}}});
 }
 function setTrend(m){ trendMode=m; document.querySelectorAll('#segMetric button').forEach((b,i)=>b.classList.toggle('on',['rev','qty','gp'][i]===m)); drawTrend(); }
@@ -1174,9 +1197,9 @@ function renderChannel(){
   </div>
   <div class="card"><div class="card-hdr"><div><div class="card-title">Detail Channel</div><div class="card-sub">revenue, unit, margin & rata-rata harga</div></div></div><div id="chCards"></div></div>`;
   $('page-channel').innerHTML=html;
-  mk('c-chRev',{type:'bar',data:{labels:chs.map(c=>c.name),datasets:[{label:'Revenue',data:chs.map(c=>c.net),backgroundColor:c=>grad(c.chart.ctx,'#3b8ff0','#1f5fd4'),borderRadius:7,maxBarThickness:60}]},
+  mk('c-chRev',{type:'bar',data:{labels:chs.map(c=>c.name),datasets:[{label:'Revenue',data:chs.map(c=>c.net),backgroundColor:c=>grad(c.chart.ctx,'#2c4a7a','#16264a'),borderRadius:7,maxBarThickness:60}]},
     options:{maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:ttMoney()},scales:{x:{grid:{display:false}},y:axisMoney()}}});
-  mk('c-chUnit',{type:'bar',data:{labels:chs.map(c=>c.name),datasets:[{label:'Unit',data:chs.map(c=>c.qty),backgroundColor:'#0ea5a3',borderRadius:7,maxBarThickness:60}]},
+  mk('c-chUnit',{type:'bar',data:{labels:chs.map(c=>c.name),datasets:[{label:'Unit',data:chs.map(c=>c.qty),backgroundColor:'#0f766e',borderRadius:7,maxBarThickness:60}]},
     options:{maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>' Unit: '+n0(c.parsed.y)}}},scales:{x:{grid:{display:false}},y:axisNum()}}});
   const icons=['🏬','🏪','🏢','🏭','🛍','🏷'];
   $('chCards').innerHTML=chs.map((c,i)=>{ const mg=c.net?(c.net-c.cogs)/c.net*100:0; const avg=c.qty?c.net/c.qty:0;
@@ -1237,9 +1260,9 @@ function renderProduct(){
     ${arts.map((a,i)=>{const mg=a.net?(a.net-a.cogs)/a.net*100:0;return `<tr><td><span class="rank ${i<3?'top':''}">${i+1}</span></td><td><b>${esc(a.name)}</b></td><td>${esc((a.de||'').slice(0,32))}</td><td>${esc(a.br)}</td><td class="num">${n0(a.qty)}</td><td class="num">${rp(a.net)}</td><td class="num"><span class="tag ${mg>=50?'g':mg>=30?'a':'r'}">${a.cogs>0?pct(mg,0):'—'}</span></td></tr>`;}).join('')}
     </tbody></table></div></div>`;
   $('page-product').innerHTML=html;
-  mk('c-prBrand',{type:'bar',data:{labels:brs.map(b=>b.name),datasets:[{label:'Revenue',data:brs.map(b=>b.net),backgroundColor:c=>grad(c.chart.ctx,'#3b8ff0','#1f5fd4'),borderRadius:6,maxBarThickness:26}]},
+  mk('c-prBrand',{type:'bar',data:{labels:brs.map(b=>b.name),datasets:[{label:'Revenue',data:brs.map(b=>b.net),backgroundColor:c=>grad(c.chart.ctx,'#2c4a7a','#16264a'),borderRadius:6,maxBarThickness:26}]},
     options:{indexAxis:'y',maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:ttMoney()},scales:{x:axisMoney(),y:{grid:{display:false}}}}});
-  mk('c-prCat',{type:'bar',data:{labels:cats.map(c=>c.name),datasets:[{label:'Revenue',data:cats.map(c=>c.net),backgroundColor:'#0ea5a3',borderRadius:6,maxBarThickness:26}]},
+  mk('c-prCat',{type:'bar',data:{labels:cats.map(c=>c.name),datasets:[{label:'Revenue',data:cats.map(c=>c.net),backgroundColor:'#0f766e',borderRadius:6,maxBarThickness:26}]},
     options:{indexAxis:'y',maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:ttMoney()},scales:{x:axisMoney(),y:{grid:{display:false}}}}});
   mk('c-prDiv',{type:'doughnut',data:{labels:divs.map(d=>d.name),datasets:[{data:divs.map(d=>d.net),backgroundColor:PALETTE,borderWidth:2,borderColor:'#fff'}]},
     options:{maintainAspectRatio:false,cutout:'60%',plugins:{legend:{position:'right'},tooltip:{callbacks:{label:c=>' '+c.label+': '+rp(c.parsed)}}}}});
@@ -1278,12 +1301,12 @@ function renderMargin(){
     <p style="font-size:12.5px;color:var(--t2);line-height:1.7">Biaya (COGS) dan Gross Profit diambil <b>langsung dari kolom COGS &amp; GrossProfit</b> pada file SAP-YTD-ALL-SALES (sheet Raw). Revenue = <b>Bill. Value</b>. Angka pada dashboard identik dengan data sumber Excel.</p></div>`;
   $('page-margin').innerHTML=html;
   mk('c-mgDiv',{type:'bar',data:{labels:dv.map(d=>d.name),datasets:[
-    {label:'Net',data:dv.map(d=>d.net),backgroundColor:'#1f5fd4',borderRadius:5},
-    {label:'COGS',data:dv.map(d=>d.cogs),backgroundColor:'#d98a12',borderRadius:5}]},
+    {label:'Net',data:dv.map(d=>d.net),backgroundColor:'#1e3357',borderRadius:5},
+    {label:'COGS',data:dv.map(d=>d.cogs),backgroundColor:'#b7791f',borderRadius:5}]},
     options:{indexAxis:'y',maintainAspectRatio:false,plugins:{tooltip:ttMoney()},scales:{x:axisMoney(),y:{grid:{display:false}}}}});
-  mk('c-mgCost',{type:'doughnut',data:{labels:['Dengan Cost','Tanpa Cost'],datasets:[{data:[A.costY,A.costN],backgroundColor:['#12a06a','#d64545'],borderWidth:2,borderColor:'#fff'}]},
+  mk('c-mgCost',{type:'doughnut',data:{labels:['Dengan Cost','Tanpa Cost'],datasets:[{data:[A.costY,A.costN],backgroundColor:['#1e8f2a','#b4423a'],borderWidth:2,borderColor:'#fff'}]},
     options:{maintainAspectRatio:false,cutout:'62%',plugins:{legend:{position:'bottom'},tooltip:{callbacks:{label:c=>' '+c.label+': '+rp(c.parsed)+' ('+pct(c.parsed/A.net*100)+')'}}}}});
-  mk('c-mgCh',{type:'bar',data:{labels:ch.map(c=>c.name),datasets:[{label:'Margin %',data:ch.map(c=>c.mg),backgroundColor:c=>{const v=c.raw;return v>=50?'#12a06a':v>=30?'#d98a12':'#d64545';},borderRadius:6,maxBarThickness:48}]},
+  mk('c-mgCh',{type:'bar',data:{labels:ch.map(c=>c.name),datasets:[{label:'Margin %',data:ch.map(c=>c.mg),backgroundColor:c=>{const v=c.raw;return v>=50?'#1e8f2a':v>=30?'#b7791f':'#b4423a';},borderRadius:6,maxBarThickness:48}]},
     options:{maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>' Margin: '+pct(c.parsed.y)}}},scales:{x:{grid:{display:false}},y:{grid:{color:gridClr},ticks:{callback:v=>v+'%'}}}}});
 }
 function mgTable(list){
@@ -1315,7 +1338,7 @@ function renderStatus(){
     ${tps.map(t=>`<tr><td><b>${esc(t.name)}</b></td><td class="num">${n0(t.lines)}</td><td class="num">${n0(t.qty)}</td><td class="num" style="color:${t.net<0?'var(--red)':'inherit'}">${rp(t.net)}</td><td class="num">${pct(A.net?t.net/A.net*100:0)}</td></tr>`).join('')}
     </tbody></table></div></div>`;
   $('page-status').innerHTML=html;
-  mk('c-stType',{type:'bar',data:{labels:tps.map(t=>t.name),datasets:[{label:'Net',data:tps.map(t=>t.net),backgroundColor:tps.map(t=>t.net<0?'#d64545':'#1f5fd4'),borderRadius:7,maxBarThickness:60}]},
+  mk('c-stType',{type:'bar',data:{labels:tps.map(t=>t.name),datasets:[{label:'Net',data:tps.map(t=>t.net),backgroundColor:tps.map(t=>t.net<0?'#b4423a':'#1e3357'),borderRadius:7,maxBarThickness:60}]},
     options:{maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:ttMoney()},scales:{x:{grid:{display:false}},y:axisMoney()}}});
   mk('c-stLines',{type:'doughnut',data:{labels:tps.map(t=>t.name),datasets:[{data:tps.map(t=>t.lines),backgroundColor:PALETTE,borderWidth:2,borderColor:'#fff'}]},
     options:{maintainAspectRatio:false,cutout:'60%',plugins:{legend:{position:'bottom'},tooltip:{callbacks:{label:c=>' '+c.label+': '+n0(c.parsed)+' baris'}}}}});
@@ -1343,8 +1366,8 @@ function renderPareto(){
     </tbody></table></div></div>`;
   $('page-pareto').innerHTML=html;
   mk('c-pareto',{data:{labels:top.map((a,i)=>a.name.slice(0,10)),datasets:[
-    {type:'bar',label:'Revenue',data:top.map(a=>a.net),backgroundColor:c=>grad(c.chart.ctx,'#3b8ff0','#1f5fd4'),borderRadius:5,yAxisID:'y',order:2},
-    {type:'line',label:'Kumulatif %',data:top.map(a=>a.cum),borderColor:'#d98a12',backgroundColor:'#d98a12',yAxisID:'y1',tension:.3,borderWidth:3,pointRadius:0,order:1}]},
+    {type:'bar',label:'Revenue',data:top.map(a=>a.net),backgroundColor:c=>grad(c.chart.ctx,'#2c4a7a','#16264a'),borderRadius:5,yAxisID:'y',order:2},
+    {type:'line',label:'Kumulatif %',data:top.map(a=>a.cum),borderColor:'#b7791f',backgroundColor:'#b7791f',yAxisID:'y1',tension:.3,borderWidth:3,pointRadius:0,order:1}]},
     options:{maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{position:'top'},tooltip:{callbacks:{label:c=>c.dataset.type==='line'?' Kumulatif: '+pct(c.parsed.y):' Revenue: '+rp(c.parsed.y)}}},
       scales:{x:{grid:{display:false},ticks:{maxRotation:60,minRotation:45,font:{size:9}}},y:{position:'left',grid:{color:gridClr},ticks:{callback:v=>rpShort(v)}},y1:{position:'right',min:0,max:100,grid:{display:false},ticks:{callback:v=>v+'%'}}}}});
 }
@@ -1543,9 +1566,9 @@ function renderStock(){
   const dv=stTop(S.byDiv,8);
   mk('c-stkDiv',{type:'doughnut',data:{labels:dv.map(x=>x.name),datasets:[{data:dv.map(x=>x.val),backgroundColor:PALETTE,borderWidth:2,borderColor:'#fff'}]},options:{maintainAspectRatio:false,cutout:'60%',plugins:{legend:{position:'right'},tooltip:{callbacks:{label:c=>' '+c.label+': '+rp(c.parsed)}}}}});
   const ageOrder=['0-3 bln','3-6 bln','6-12 bln','1-2 thn','2-3 thn','> 3 thn','(?)']; const ag=ageOrder.filter(k=>S.byAge[k]);
-  mk('c-stkAge',{type:'bar',data:{labels:ag,datasets:[{label:'Nilai',data:ag.map(k=>S.byAge[k].val),backgroundColor:c=>{const L=ag[c.dataIndex]; return (L.indexOf('thn')>=0)?'#d64545':(L==='6-12 bln'?'#d98a12':'#12a06a');},borderRadius:6,maxBarThickness:46}]},options:{maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>' '+rp(c.parsed.y)}}},scales:{x:{grid:{display:false}},y:axisMoney()}}});
+  mk('c-stkAge',{type:'bar',data:{labels:ag,datasets:[{label:'Nilai',data:ag.map(k=>S.byAge[k].val),backgroundColor:c=>{const L=ag[c.dataIndex]; return (L.indexOf('thn')>=0)?'#b4423a':(L==='6-12 bln'?'#b7791f':'#1e8f2a');},borderRadius:6,maxBarThickness:46}]},options:{maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>' '+rp(c.parsed.y)}}},scales:{x:{grid:{display:false}},y:axisMoney()}}});
   const ct=stTop(S.byCat,10);
-  mk('c-stkCat',{type:'bar',data:{labels:ct.map(x=>x.name),datasets:[{label:'Nilai',data:ct.map(x=>x.val),backgroundColor:'#1f5fd4',borderRadius:5,maxBarThickness:22}]},options:{indexAxis:'y',maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>' '+rp(c.parsed.x)}}},scales:{x:axisMoney(),y:{grid:{display:false}}}}});
+  mk('c-stkCat',{type:'bar',data:{labels:ct.map(x=>x.name),datasets:[{label:'Nilai',data:ct.map(x=>x.val),backgroundColor:'#1e3357',borderRadius:5,maxBarThickness:22}]},options:{indexAxis:'y',maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>' '+rp(c.parsed.x)}}},scales:{x:axisMoney(),y:{grid:{display:false}}}}});
   const ty=stArr(S.byType).sort((a,b)=>b.val-a.val);
   mk('c-stkType',{type:'doughnut',data:{labels:ty.map(x=>x.name),datasets:[{data:ty.map(x=>x.val),backgroundColor:PALETTE,borderWidth:2,borderColor:'#fff'}]},options:{maintainAspectRatio:false,cutout:'58%',plugins:{legend:{position:'bottom'},tooltip:{callbacks:{label:c=>' '+c.label+': '+rp(c.parsed)}}}}});
   const se=stArr(S.bySeason).filter(x=>/^\d{4}/.test(x.name)).sort((a,b)=>a.name.localeCompare(b.name));
@@ -1553,11 +1576,11 @@ function renderStock(){
   // cross div
   const dc=Object.keys(S.divCross).map(k=>Object.assign({name:k},S.divCross[k])).sort((a,b)=>b.stockVal-a.stockVal).slice(0,8);
   mk('c-xDiv',{type:'bar',data:{labels:dc.map(x=>x.name),datasets:[
-    {label:'Nilai Stock',data:dc.map(x=>x.stockVal),backgroundColor:'#d98a12',borderRadius:5},
-    {label:'Revenue',data:dc.map(x=>x.salesRev),backgroundColor:'#1f5fd4',borderRadius:5}]},
+    {label:'Nilai Stock',data:dc.map(x=>x.stockVal),backgroundColor:'#b7791f',borderRadius:5},
+    {label:'Revenue',data:dc.map(x=>x.salesRev),backgroundColor:'#1e3357',borderRadius:5}]},
     options:{maintainAspectRatio:false,plugins:{tooltip:{callbacks:{label:c=>' '+c.dataset.label+': '+rp(c.parsed.y)}}},scales:{x:{grid:{display:false}},y:axisMoney()}}});
   const cov=dc.map(x=>({name:x.name,cover: x.salesQty>0? +(x.stockQty/(x.salesQty/C.months)).toFixed(1) : (x.stockQty>0?null:0)}));
-  mk('c-xCover',{type:'bar',data:{labels:cov.map(x=>x.name),datasets:[{label:'Bulan cover',data:cov.map(x=>x.cover),backgroundColor:c=>{const v=c.raw; return v==null?'#9a9a96':v>12?'#d64545':v>6?'#d98a12':'#12a06a';},borderRadius:6,maxBarThickness:40}]},options:{maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>' '+(c.parsed.y==null?'∞':c.parsed.y+' bln')}}},scales:{x:{grid:{display:false}},y:{grid:{color:gridClr},ticks:{callback:v=>v+' bln'}}}}});
+  mk('c-xCover',{type:'bar',data:{labels:cov.map(x=>x.name),datasets:[{label:'Bulan cover',data:cov.map(x=>x.cover),backgroundColor:c=>{const v=c.raw; return v==null?'#9a9a96':v>12?'#b4423a':v>6?'#b7791f':'#1e8f2a';},borderRadius:6,maxBarThickness:40}]},options:{maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>' '+(c.parsed.y==null?'∞':c.parsed.y+' bln')}}},scales:{x:{grid:{display:false}},y:{grid:{color:gridClr},ticks:{callback:v=>v+' bln'}}}}});
   const pts=C.scatter.map(x=>({x:x.sq,y:x.stq}));
   mk('c-xScatter',{type:'scatter',data:{datasets:[{label:'Generic',data:pts,backgroundColor:'rgba(31,95,212,.45)',pointRadius:3}]},
     options:{maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>' terjual '+n0(c.parsed.x)+' · stok '+n0(c.parsed.y)}}},scales:{x:{title:{display:true,text:tr('Unit terjual','Units sold')},grid:{color:gridClr},ticks:{callback:v=>n0(v)}},y:{title:{display:true,text:tr('Qty stok','Stock qty')},grid:{color:gridClr},ticks:{callback:v=>n0(v)}}}}});
@@ -1591,15 +1614,66 @@ function renderPDM(){
   </div>
   <div class="card"><div class="card-hdr"><div><div class="card-title">Top Warna Utama</div></div></div><div class="chart-wrap sm"><canvas id="c-pdmColor"></canvas></div></div>`;
   $('page-pdm').innerHTML=html;
-  const br=t(P.brand,12); mk('c-pdmBrand',{type:'bar',data:{labels:br.map(x=>x[0]),datasets:[{label:'Artikel',data:br.map(x=>x[1]),backgroundColor:c=>grad(c.chart.ctx,'#3b8ff0','#1f5fd4'),borderRadius:6,maxBarThickness:26}]},options:{indexAxis:'y',maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:axisNum(),y:{grid:{display:false}}}}});
-  const yr=Object.entries(P.year).filter(x=>/^\d{4}/.test(x[0])).sort((a,b)=>a[0].localeCompare(b[0])); mk('c-pdmYear',{type:'bar',data:{labels:yr.map(x=>x[0]),datasets:[{label:'Artikel',data:yr.map(x=>x[1]),backgroundColor:'#0ea5a3',borderRadius:5,maxBarThickness:30}]},options:{maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:axisNum()}}});
+  const br=t(P.brand,12); mk('c-pdmBrand',{type:'bar',data:{labels:br.map(x=>x[0]),datasets:[{label:'Artikel',data:br.map(x=>x[1]),backgroundColor:c=>grad(c.chart.ctx,'#2c4a7a','#16264a'),borderRadius:6,maxBarThickness:26}]},options:{indexAxis:'y',maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:axisNum(),y:{grid:{display:false}}}}});
+  const yr=Object.entries(P.year).filter(x=>/^\d{4}/.test(x[0])).sort((a,b)=>a[0].localeCompare(b[0])); mk('c-pdmYear',{type:'bar',data:{labels:yr.map(x=>x[0]),datasets:[{label:'Artikel',data:yr.map(x=>x[1]),backgroundColor:'#0f766e',borderRadius:5,maxBarThickness:30}]},options:{maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:axisNum()}}});
   const ageOrder=['< 1 thn','1-2 thn','2-3 thn','3-5 thn','> 5 thn','(Tanpa Umur)']; const ag=ageOrder.filter(k=>P.ageBands[k]); mk('c-pdmAge',{type:'bar',data:{labels:ag,datasets:[{label:'Artikel',data:ag.map(k=>P.ageBands[k]),backgroundColor:'#6d5ae0',borderRadius:5,maxBarThickness:38}]},options:{maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:axisNum()}}});
-  const pbOrder=['< 200rb','200-400rb','400-600rb','600rb-1jt','> 1jt','(Tanpa Harga)']; const pb=pbOrder.filter(k=>P.priceBands[k]); mk('c-pdmPrice',{type:'bar',data:{labels:pb,datasets:[{label:'Artikel',data:pb.map(k=>P.priceBands[k]),backgroundColor:'#d98a12',borderRadius:5,maxBarThickness:38}]},options:{maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:axisNum()}}});
+  const pbOrder=['< 200rb','200-400rb','400-600rb','600rb-1jt','> 1jt','(Tanpa Harga)']; const pb=pbOrder.filter(k=>P.priceBands[k]); mk('c-pdmPrice',{type:'bar',data:{labels:pb,datasets:[{label:'Artikel',data:pb.map(k=>P.priceBands[k]),backgroundColor:'#b7791f',borderRadius:5,maxBarThickness:38}]},options:{maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:axisNum()}}});
   const gd=t(P.gender,6); mk('c-pdmGender',{type:'doughnut',data:{labels:gd.map(x=>x[0]),datasets:[{data:gd.map(x=>x[1]),backgroundColor:PALETTE,borderWidth:2,borderColor:'#fff'}]},options:{maintainAspectRatio:false,cutout:'58%',plugins:{legend:{position:'bottom'}}}});
   const cl=t(P.color,12).filter(x=>x[0]&&x[0]!=='(N/A)'); mk('c-pdmColor',{type:'bar',data:{labels:cl.map(x=>x[0]),datasets:[{label:'Artikel',data:cl.map(x=>x[1]),backgroundColor:'#d6479a',borderRadius:5,maxBarThickness:30}]},options:{maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false},ticks:{maxRotation:50,minRotation:30,font:{size:9}}},y:axisNum()}}});
 }
 
 /* ---------- UPLOAD ---------- */
+/* ---------- DATABASE UPDATE STATUS ---------- */
+function latestSalesYM(){
+  if(!DATA||!DATA.rec) return null;
+  let best=-1,by=0,bm=0;
+  for(const r of DATA.rec){ const k=(r.y||0)*12+(r.m||0); if(k>best){ best=k; by=r.y; bm=r.m; } }
+  return best>0?{y:by,m:bm}:null;
+}
+function fmtMonthYear(ym){
+  if(!ym||!ym.m) return '—';
+  const moID=['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+  const moEN=['January','February','March','April','May','June','July','August','September','October','November','December'];
+  return (LANG==='en'?moEN:moID)[ym.m-1]+' '+ym.y;
+}
+function renderDbStatus(){
+  const S=DATA?DATA.stock:null;
+  const sales=latestSalesYM();
+  const M=DATA&&DATA.meta?DATA.meta:{months:[],years:[],rows:0};
+  const periodTxt=(M.months&&M.months.length)?(MONTHS[M.months[0]-1]+'–'+MONTHS[M.months[M.months.length-1]-1]+' '+((M.years&&M.years.length)?M.years[M.years.length-1]:'')):'—';
+  const chans=DATA?new Set(DATA.rec.map(r=>r.ch)).size:0;
+  const pdmOk=!!(DATA&&DATA.pdm&&DATA.pdm.total);
+  const nfiles=5, nActive=(DATA?1:0)+(S?1:0)+(pdmOk?1:0)+(DATA?1:0)+(chans?1:0);
+  const rows=[
+    {nm:'SAP-YTD-ALL-SALES.xlsx', jenis:tr('Transaksi Penjualan','Sales Transactions'), trx:true, tgl:fmtMonthYear(sales), cnt:DATA?(n0(M.rows)+' '+tr('baris','rows')):'—', ok:!!DATA, note:tr('Periode','Period')+': '+periodTxt},
+    {nm:'StockSAP_MD.XLSX', jenis:tr('Data Stock / Persediaan','Stock / Inventory'), trx:true, tgl:S?(S.period||'—'):tr('Belum diupload','Not uploaded'), cnt:S?(n0(S.totals.rows)+' '+tr('baris','rows')):'—', ok:!!S, note:S?(tr('Nilai persediaan','Inventory value')+': '+rpShort(S.totals.val)):tr('Upload di halaman Upload Data','Upload from the Upload Data page')},
+    {nm:'SAP - PDM.xlsx', jenis:tr('Master Produk','Product Master'), trx:false, tgl:tr('— non-transaksi','— non-transactional'), cnt:pdmOk?(n0(DATA.pdm.total)+' '+tr('artikel','articles')):'—', ok:pdmOk, note:tr('Master referensi artikel','Article reference master')},
+    {nm:'Distribution Channel Master.xlsx', jenis:tr('Master Channel','Channel Master'), trx:false, tgl:tr('— non-transaksi','— non-transactional'), cnt:chans?(n0(chans)+' '+tr('channel','channels')):'—', ok:!!chans, note:tr('Lookup nama channel','Channel name lookup')},
+    {nm:'SAP_COGS_SRP.xlsx', jenis:tr('Master COGS','COGS Master'), trx:false, tgl:tr('— non-transaksi','— non-transactional'), cnt:'—', ok:!!DATA, note:tr('Lookup biaya (COGS) — sudah diterapkan','Cost lookup (COGS) — applied')}
+  ];
+  const html=`
+  <div class="kpi-grid">
+    ${kpi(tr('Periode Penjualan Terbaru','Latest Sales Period'),fmtMonthYear(sales),tr('transaksi terbaru dalam data','latest transaction in data'),'','🗓️','var(--brand-l)')}
+    ${kpi(tr('Total Transaksi','Total Transactions'),DATA?n0(M.rows):'—',tr('baris pada file penjualan','rows in sales file'),'k-teal','🧾','var(--teal-l)')}
+    ${kpi(tr('Update Stock','Stock Update'),S?(S.period||'—'):tr('—','—'),S?(rpShort(S.totals.val)+' '+tr('nilai','value')):tr('belum diupload','not uploaded'),S?'k-green':'k-amber','📦',S?'var(--green-l)':'var(--amber-l)')}
+    ${kpi(tr('File Sumber Aktif','Active Source Files'),nActive+' / '+nfiles,tr('file Excel terhubung','connected Excel files'),'k-purple','🗂️','var(--purple-l)')}
+  </div>
+  <div class="card" style="margin-top:2px"><div class="card-hdr"><div><div class="card-title">${tr('Status File Sumber Excel','Source Excel File Status')}</div><div class="card-sub">${tr('nama file & tanggal transaksi terbaru di dalamnya','file name & latest transaction date inside')}</div></div><span class="badge-live"><span class="dot"></span>${tr('LANGSUNG','LIVE')}</span></div>
+    <div class="tbl-wrap" style="margin-top:12px"><table class="dt"><thead><tr>
+      <th>${tr('File Excel','Excel File')}</th><th>${tr('Jenis','Type')}</th><th>${tr('Tanggal Transaksi Terbaru','Latest Transaction Date')}</th><th class="num">${tr('Isi','Contents')}</th><th>${tr('Status','Status')}</th>
+    </tr></thead><tbody>
+    ${rows.map(r=>`<tr>
+      <td><b>${esc(r.nm)}</b><div style="font-size:11px;color:var(--t3);margin-top:2px">${esc(r.note)}</div></td>
+      <td><span class="tag ${r.trx?'b':'a'}">${esc(r.jenis)}</span></td>
+      <td style="font-weight:700;color:${r.trx&&r.ok?'var(--brand)':'var(--t2)'}">${esc(r.tgl)}</td>
+      <td class="num">${esc(r.cnt)}</td>
+      <td><span class="tag ${r.ok?'g':'a'}">${r.ok?(r.trx?tr('Aktif','Active'):tr('Diterapkan','Applied')):tr('Belum dimuat','Not loaded')}</span></td>
+    </tr>`).join('')}
+    </tbody></table></div>
+    <p style="font-size:11.5px;color:var(--t3);margin-top:12px;line-height:1.6">${tr('Catatan: tanggal transaksi penjualan ditampilkan pada tingkat bulan (sesuai granularitas data sumber). Tanggal stock mengikuti periode snapshot pada file StockSAP_MD. File master bersifat referensi (tanpa tanggal transaksi).','Note: sales transaction date is shown at month granularity (per source data). Stock date follows the snapshot period in StockSAP_MD. Master files are reference-only (no transaction date).')}</p>
+  </div>`;
+  $('page-dbstatus').innerHTML=html;
+}
 function renderUpload(){
   const st=DATA?DATA.statuses:{};
   const need=[
