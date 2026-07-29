@@ -270,6 +270,36 @@ table.dt td.num,table.dt th.num{text-align:right;font-variant-numeric:tabular-nu
 .sb-credit-top .cr-sub{position:relative;z-index:1;font-size:9.5px;color:#93a3c6;margin-top:9px;padding-top:8px;line-height:1.45;
   border-top:1px solid rgba(255,255,255,.07);display:flex;align-items:center;gap:6px}
 .sb-credit-top .cr-sub .spark{color:#d9b25a;font-size:9px;flex:none}
+/* ===== brand hero (halaman utama) ===== */
+.brand-hero{position:relative;display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap;
+  margin-bottom:18px;padding:18px 24px;border-radius:17px;overflow:hidden;
+  background:linear-gradient(120deg,#0d1a11 0%,#11223a 55%,#0f1b38 100%);
+  border:1px solid rgba(255,255,255,.09);
+  box-shadow:0 14px 38px -18px rgba(0,0,0,.75),inset 0 1px 0 rgba(255,255,255,.05)}
+.brand-hero::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;
+  background:linear-gradient(90deg,#3cb043,#8ede7f 45%,#3cb043 70%,transparent)}
+.brand-hero::after{content:'';position:absolute;right:-70px;top:-90px;width:280px;height:280px;
+  background:radial-gradient(circle,rgba(60,176,67,.16),transparent 62%);pointer-events:none}
+.bh-left{display:flex;align-items:center;gap:17px;position:relative;z-index:1;min-width:0}
+.bh-logo{flex:none;width:86px;height:74px;border-radius:14px;background:#fff;display:flex;align-items:center;justify-content:center;
+  padding:7px;box-shadow:0 7px 20px -7px rgba(0,0,0,.55)}
+.bh-logo img{height:100%;width:auto;max-width:100%;object-fit:contain;display:block}
+.bh-logo .bh-mono{display:none;font-family:'Sora';font-weight:800;font-size:36px;color:#2e8b2e}
+.bh-logo.noimg .bh-mono{display:block}
+.bh-company{font-size:11.5px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:#9fead0}
+.bh-brand{font-family:'Sora';font-weight:800;font-size:31px;line-height:1;color:#fff;margin-top:4px;letter-spacing:.02em;display:flex;align-items:flex-start;gap:3px}
+.bh-brand .bh-tm{font-size:12px;font-weight:700;color:#8ede7f;margin-top:2px}
+.bh-tag{font-size:11px;color:#8fa0c8;margin-top:7px;letter-spacing:.05em}
+.bh-right{position:relative;z-index:1;text-align:right;min-width:158px}
+.bh-clock{font-family:'Sora';font-weight:800;font-size:31px;color:#fff;letter-spacing:.04em;font-variant-numeric:tabular-nums;line-height:1}
+.bh-date{font-size:12px;color:#b7c4e0;margin-top:7px}
+.bh-live{display:inline-flex;align-items:center;gap:6px;margin-top:9px;font-size:10px;font-weight:700;letter-spacing:.13em;text-transform:uppercase;color:#8ede7f}
+.bh-live .dot{width:7px;height:7px;border-radius:50%;background:#3cb043;animation:bhpulse 1.6s infinite}
+@keyframes bhpulse{0%{box-shadow:0 0 0 0 rgba(60,176,67,.55)}70%{box-shadow:0 0 0 8px rgba(60,176,67,0)}100%{box-shadow:0 0 0 0 rgba(60,176,67,0)}}
+body.view-mobile .brand-hero{padding:15px 17px}
+body.view-mobile .bh-right{text-align:left}
+body.view-mobile .bh-brand{font-size:26px}
+body.view-mobile .bh-clock{font-size:26px}
 /* SWOT page */
 .swot-grid{display:grid;grid-template-columns:1fr 1fr;gap:15px;margin-bottom:15px}
 .swot-card{border-radius:var(--r);padding:18px;border:1px solid var(--border);position:relative;overflow:hidden;box-shadow:var(--sh-sm)}
@@ -359,7 +389,7 @@ body.view-desktop .hamb{display:none}
   <aside class="sidebar" id="sidebar">
     <div class="logo-wrap">
       <div class="logo-box">B</div>
-      <div><div class="logo-text">BERCA Retail</div><div class="logo-sub">SAP Sales Intelligence · build C14 ✓ · kredit tampil penuh + sesi tetap</div></div>
+      <div><div class="logo-text">BERCA Retail</div><div class="logo-sub">SAP Sales Intelligence · build C16 ✓ · logo LEAGUE tertanam (SVG) 1-file</div></div>
     </div>
     <div class="sb-credit-top">
       <div class="cr-row">
@@ -999,6 +1029,39 @@ function kpi(label,val,sub,cls,ic,icbg){ return `<div class="kpi ${cls||''}"><di
 function topN(o,n,by){ by=by||'net'; return arr(o).sort((a,b)=>(b[by]||0)-(a[by]||0)).slice(0,n); }
 
 /* ---------- OVERVIEW ---------- */
+/* ---------- brand hero + live clock (halaman utama) ---------- */
+function brandHero(){
+  return `
+  <div class="brand-hero">
+    <div class="bh-left">
+      <div class="bh-logo"><svg viewBox="0 0 800 800" width="100%" height="100%" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" aria-label="LEAGUE"><path d="M320 175 L480 175 Q512 177 522 215 L648 600 Q662 642 622 645 L178 645 Q138 642 152 600 L278 215 Q288 177 320 175 Z" fill="#ffffff" stroke="#0a0a0a" stroke-width="36" stroke-linejoin="round"/><path d="M315 205 L425 205 L395 500 L530 500 L545 600 L290 600 Z" fill="#1e8f2a"/></svg></div>
+      <div class="bh-txt">
+        <div class="bh-company">PT. Berca Sportindo</div>
+        <div class="bh-brand">LEAGUE<span class="bh-tm">&trade;</span></div>
+        <div class="bh-tag">${tr('Lead The Way · Intelijen Penjualan SAP','Lead The Way · SAP Sales Intelligence')}</div>
+      </div>
+    </div>
+    <div class="bh-right">
+      <div class="bh-clock" id="brandClock">--:--:--</div>
+      <div class="bh-date" id="brandDate">—</div>
+      <div class="bh-live"><span class="dot"></span>${tr('LANGSUNG','LIVE')}</div>
+    </div>
+  </div>`;
+}
+let BRAND_CLOCK_TIMER=null;
+function updateBrandClock(){
+  const c=document.getElementById('brandClock'), d=document.getElementById('brandDate');
+  if(!c && !d){ if(BRAND_CLOCK_TIMER){ clearInterval(BRAND_CLOCK_TIMER); BRAND_CLOCK_TIMER=null; } return; }
+  const now=new Date(), p=n=>String(n).padStart(2,'0');
+  const daysID=['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
+  const daysEN=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  const moID=['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+  const moEN=['January','February','March','April','May','June','July','August','September','October','November','December'];
+  const en=LANG==='en';
+  if(c) c.textContent=p(now.getHours())+':'+p(now.getMinutes())+':'+p(now.getSeconds());
+  if(d) d.textContent=(en?daysEN:daysID)[now.getDay()]+', '+now.getDate()+' '+(en?moEN:moID)[now.getMonth()]+' '+now.getFullYear();
+}
+function startBrandClock(){ updateBrandClock(); if(!BRAND_CLOCK_TIMER) BRAND_CLOCK_TIMER=setInterval(updateBrandClock,1000); }
 function renderOverview(){
   const A=VIEW;
   const mrev=DATA.meta.months.map(mo=>A.month[mo]?A.month[mo].net:0);
@@ -1021,7 +1084,8 @@ function renderOverview(){
     <div class="card"><div class="card-hdr"><div><div class="card-title">Top 8 Customer</div><div class="card-sub">by revenue</div></div></div><div class="chart-wrap sm"><canvas id="c-ovLoc"></canvas></div></div>
   </div>
   <div class="card"><div class="card-hdr"><div><div class="card-title">Ringkasan Channel</div><div class="card-sub">Revenue, unit, margin & kontribusi</div></div></div>${chTable(A)}</div>`;
-  $('page-overview').innerHTML=html;
+  $('page-overview').innerHTML=brandHero()+html;
+  startBrandClock();
   // charts
   mk('c-ovMonth',{type:'bar',data:{labels:DATA.meta.months.map(mo=>MONTHS[mo-1]),datasets:[{label:'Revenue',data:mrev,backgroundColor:c=>grad(c.chart.ctx,'#3b8ff0','#1f5fd4'),borderRadius:7,maxBarThickness:54}]},
     options:{maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:ttMoney()},scales:{x:{grid:{display:false}},y:axisMoney()}}});
