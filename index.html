@@ -318,7 +318,7 @@ body.view-mobile .bh-clock{font-size:26px}
 .sb-clockdate{font-size:11px;color:#b7c4e0;margin-top:5px}
 .sb-clocklive{display:inline-flex;align-items:center;gap:6px;margin-top:7px;font-size:9px;font-weight:700;letter-spacing:.13em;text-transform:uppercase;color:#8ede7f}
 .sb-clocklive .dot{width:6px;height:6px;border-radius:50%;background:#3cb043;animation:bhpulse 1.6s infinite}
-.sb-nav{flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;padding-bottom:6px}
+.sb-nav{flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;padding-bottom:6px;display:flex;flex-direction:column}
 .sidebar-footer .sb-credit-top{margin:0 0 10px}
 .sidebar-footer .sb-update{margin:0 0 10px}
 .sb-build{font-size:8px;color:#5f6f92;text-align:center;padding:8px 6px 0;letter-spacing:.02em}
@@ -440,10 +440,9 @@ body.view-desktop .hamb{display:none}
       <div class="nav-item" data-pg="swot" onclick="go('swot')"><span class="nav-icon">🧭</span><span data-i18n="Analisa SWOT|SWOT Analysis">Analisa SWOT</span></div>
       <div class="nav-sec" data-i18n="Master Data|Master Data">Master Data</div>
       <div class="nav-item" data-pg="pdm" onclick="go('pdm')"><span class="nav-icon">📦</span><span data-i18n="Product Data Master|Product Data Master">Product Data Master</span></div>
-      <div class="nav-sec" data-i18n="Sistem|System">Sistem</div>
       <div class="nav-item" data-pg="dbstatus" onclick="go('dbstatus')"><span class="nav-icon">🗂️</span><span data-i18n="Status Update Data|Database Update Status">Status Update Data</span></div>
+      <div class="nav-sec" id="secSistem" data-i18n="Sistem|System">Sistem</div>
       <div class="nav-item" data-pg="upload" onclick="go('upload')"><span class="nav-icon">⬆</span><span data-i18n="Upload Data|Upload Data">Upload Data</span></div>
-    </nav>
     <div class="sidebar-footer">
       <div class="sb-credit-top">
         <div class="cr-row">
@@ -458,8 +457,9 @@ body.view-desktop .hamb{display:none}
       <div class="sb-update"><div class="u-lbl" data-i18n="Update Database Terakhir|Last Database Update">Update Database Terakhir</div><div class="u-val" id="sbUpdate">—</div><div class="u-sub" id="sbUpdateSub"></div></div>
       <div class="user-info"><div class="user-avatar" id="sbAv">A</div><div style="min-width:0"><div class="user-name" id="sbName">Admin</div><div class="user-role" id="sbRole">Super Admin</div></div></div>
       <button class="btn-logout" onclick="doLogout()" data-i18n="Keluar|Log Out">Keluar</button>
-      <div class="sb-build">SAP Sales Intelligence · build C18 ✓ · tema Navy+Emas</div>
+      <div class="sb-build">SAP Sales Intelligence · build C20 ✓ · Status Update untuk semua user</div>
     </div>
+    </nav>
   </aside>
 
   <main class="main">
@@ -563,6 +563,7 @@ function enterApp(mode,u){
   $('sbAv').textContent=(CUR.name||'?')[0].toUpperCase();
   // Upload Data hanya untuk Super Admin
   const upNav=document.querySelector('[data-pg="upload"]'); if(upNav) upNav.style.display=isSuperAdmin()?'flex':'none';
+  const secS=document.getElementById('secSistem'); if(secS) secS.style.display=isSuperAdmin()?'block':'none';
   applyLang(); applyDevice();
   startBrandClock();
   restoreData();
